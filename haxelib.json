@@ -1,0 +1,25 @@
+{
+  "name": "digigun.formats.hx",
+  "url": "https://github.com/igazine/digigun.formats.hx",
+  "license": "MIT",
+  "tags": [
+    "haxe",
+    "format",
+    "parser",
+    "serializer",
+    "ini",
+    "toml",
+    "csv",
+    "properties",
+    "env",
+    "yaml",
+    "cross"
+  ],
+  "description": "Strongly typed, cross-platform readers and writers for file and data formats.",
+  "version": "0.1.0",
+  "classPath": "src",
+  "releasenote": "Initial release with strongly typed core interfaces and INI support.",
+  "contributors": [
+    "digigun"
+  ]
+}

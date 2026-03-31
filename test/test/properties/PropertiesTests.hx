@@ -1,0 +1,75 @@
+package test.properties;
+
+import digigun.formats.FormatErrorCode;
+import digigun.formats.properties.PropertiesCodec;
+import digigun.formats.properties.PropertiesDocument;
+import digigun.formats.properties.PropertiesReader;
+import test.Assertions;
+
+class PropertiesTests {
+  public static function run():Void {
+    testPropertiesParsing();
+    testPropertiesRoundTrip();
+    testMutablePropertiesEditing();
+    testInvalidProperties();
+  }
+
+  static function testPropertiesParsing():Void {
+    var reader = new PropertiesReader();
+    var source = '# comment
+name=digigun
+theme:clean';
+
+    switch (reader.read(source)) {
+      case Success(document):
+        Assertions.assertEquals("properties entry count", 2, document.entries.length);
+        Assertions.assertEquals("properties parsed value", "clean", document.getProperty("theme").value);
+      case Failure(error):
+        Assertions.fail('Expected properties parse to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testPropertiesRoundTrip():Void {
+    var document = new PropertiesDocument();
+    document.setProperty("name", "digigun");
+    document.setProperty("theme", "clean");
+    var codec = new PropertiesCodec();
+
+    var serialized = switch (codec.write(document)) {
+      case Success(value):
+        value;
+      case Failure(error):
+        Assertions.fail('Expected properties write to succeed: ${error.toString()}');
+        "";
+    };
+
+    switch (codec.read(serialized)) {
+      case Success(parsed):
+        Assertions.assertEquals("properties round trip entry count", 2, parsed.entries.length);
+        Assertions.assertEquals("properties round trip theme", "clean", parsed.getProperty("theme").value);
+      case Failure(error):
+        Assertions.fail('Expected properties round trip parse to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testMutablePropertiesEditing():Void {
+    var document = new PropertiesDocument();
+    document.setProperty("name", "digigun");
+    document.setProperty("name", "igazine");
+
+    Assertions.assertTrue("mutable properties has property", document.hasProperty("name"));
+    Assertions.assertEquals("mutable properties updated value", "igazine", document.getProperty("name").value);
+    Assertions.assertTrue("mutable properties remove", document.removeProperty("name"));
+    Assertions.assertTrue("mutable properties removed", !document.hasProperty("name"));
+  }
+
+  static function testInvalidProperties():Void {
+    var reader = new PropertiesReader();
+    switch (reader.read("=broken")) {
+      case Failure(error):
+        Assertions.assertEquals("invalid properties code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected malformed properties to fail.");
+    }
+  }
+}

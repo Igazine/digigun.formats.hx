@@ -1,0 +1,4 @@
+-cp src
+-main digigun.formats.BuildTarget
+--interp
+

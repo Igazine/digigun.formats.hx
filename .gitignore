@@ -1,0 +1,6 @@
+.haxelib/
+bin/
+dist/
+dump/
+node_modules/
+
