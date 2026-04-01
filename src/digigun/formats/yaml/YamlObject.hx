@@ -1,5 +1,7 @@
 package digigun.formats.yaml;
 
+import digigun.formats.internal.StructuredDataTools;
+
 /**
  * Represents a mutable YAML mapping.
  */
@@ -18,47 +20,34 @@ class YamlObject {
    * Returns the first property with the matching key, if present.
    */
   public function getProperty(key:String):Null<YamlProperty> {
-    for (property in properties) {
-      if (property.key == key) {
-        return property;
-      }
-    }
-    return null;
+    return StructuredDataTools.findByStringKey(properties, key, function(property) return property.key);
   }
 
   /**
    * Returns whether a property with the given key exists.
    */
   public function hasProperty(key:String):Bool {
-    return getProperty(key) != null;
+    return StructuredDataTools.hasByStringKey(properties, key, function(property) return property.key);
   }
 
   /**
    * Sets a property value in place, creating the property when missing.
    */
   public function setProperty(key:String, value:YamlValue):YamlProperty {
-    var existing = getProperty(key);
-    if (existing != null) {
-      existing.value = value;
-      return existing;
-    }
-
-    var property = new YamlProperty(key, value);
-    properties.push(property);
-    return property;
+    return StructuredDataTools.setByStringKey(
+      properties,
+      key,
+      value,
+      function(property) return property.key,
+      function(property, nextValue) property.value = nextValue,
+      function(name, nextValue) return new YamlProperty(name, nextValue)
+    );
   }
 
   /**
    * Removes the first property with the given key.
    */
   public function removeProperty(key:String):Bool {
-    for (index in 0...properties.length) {
-      if (properties[index].key == key) {
-        properties.splice(index, 1);
-        return true;
-      }
-    }
-    return false;
+    return StructuredDataTools.removeByStringKey(properties, key, function(property) return property.key);
   }
 }
-

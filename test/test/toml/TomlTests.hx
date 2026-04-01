@@ -9,10 +9,13 @@ import digigun.formats.toml.TomlTable;
 import digigun.formats.toml.TomlValue;
 import digigun.formats.toml.TomlValues;
 import test.Assertions;
+import test.FixtureTools;
 
 class TomlTests {
   public static function run():Void {
     testTomlParsing();
+    testTomlEdgeFixture();
+    testTomlSampleFixture();
     testTomlRoundTrip();
     testInvalidToml();
     testTomlValueConversions();
@@ -21,13 +24,7 @@ class TomlTests {
   }
 
   static function testTomlParsing():Void {
-    var source = '# comment
-title = "digigun.formats"
-ports = [80, 443]
-
-[server]
-enabled = true
-threshold = 2.5';
+    var source = FixtureTools.text("toml/parse.toml");
     var reader = new TomlReader();
 
     switch (reader.read(source)) {
@@ -57,7 +54,7 @@ threshold = 2.5';
         "";
     };
 
-    Assertions.assertTrue("serialized toml includes table", serialized.indexOf("[server]") >= 0);
+    Assertions.assertEquals("toml serialized fixture", FixtureTools.text("toml/serialize.toml"), serialized);
 
     switch (codec.read(serialized)) {
       case Success(parsed):
@@ -65,6 +62,34 @@ threshold = 2.5';
         Assertions.assertEquals("toml round trip table count", 1, parsed.tables.length);
       case Failure(error):
         Assertions.fail('Expected TOML round trip parse to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testTomlEdgeFixture():Void {
+    var reader = new TomlReader();
+    var source = FixtureTools.text("toml/edge.toml");
+
+    switch (reader.read(source)) {
+      case Success(document):
+        Assertions.assertEquals("toml edge empty string", "", document.getGlobalProperty("empty").value.asString());
+        Assertions.assertEquals("toml edge flags size", 2, document.getGlobalProperty("flags").value.asArray().length);
+        Assertions.assertEquals("toml edge quoted hash", "hello # not comment", document.getTable("server").getProperty("message").value.asString());
+      case Failure(error):
+        Assertions.fail('Expected TOML edge fixture to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testTomlSampleFixture():Void {
+    var reader = new TomlReader();
+    var source = FixtureTools.text("toml/sample.toml");
+
+    switch (reader.read(source)) {
+      case Success(document):
+        Assertions.assertEquals("toml sample authors size", 2, document.getGlobalProperty("authors").value.asArray().length);
+        Assertions.assertEquals("toml sample project version", "0.1.0", document.getTable("project").getProperty("version").value.asString());
+        Assertions.assertEquals("toml sample ci jobs size", 2, document.getTable("ci").getProperty("jobs").value.asArray().length);
+      case Failure(error):
+        Assertions.fail('Expected TOML sample fixture to succeed: ${error.toString()}');
     }
   }
 

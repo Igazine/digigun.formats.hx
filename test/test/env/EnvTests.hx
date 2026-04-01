@@ -5,10 +5,12 @@ import digigun.formats.env.EnvCodec;
 import digigun.formats.env.EnvDocument;
 import digigun.formats.env.EnvReader;
 import test.Assertions;
+import test.FixtureTools;
 
 class EnvTests {
   public static function run():Void {
     testEnvParsing();
+    testEnvSampleFixture();
     testEnvRoundTrip();
     testMutableEnvEditing();
     testInvalidEnv();
@@ -16,9 +18,7 @@ class EnvTests {
 
   static function testEnvParsing():Void {
     var reader = new EnvReader();
-    var source = '# comment
-export APP_NAME="digigun formats"
-PORT=8080';
+    var source = FixtureTools.text("env/parse.env");
 
     switch (reader.read(source)) {
       case Success(document):
@@ -44,12 +44,28 @@ PORT=8080';
         "";
     };
 
+    Assertions.assertEquals("env serialized fixture", FixtureTools.text("env/serialize.env"), serialized);
+
     switch (codec.read(serialized)) {
       case Success(parsed):
         Assertions.assertEquals("env round trip entry count", 2, parsed.entries.length);
         Assertions.assertEquals("env round trip exported", true, parsed.getProperty("APP_NAME").exported);
       case Failure(error):
         Assertions.fail('Expected env round trip parse to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testEnvSampleFixture():Void {
+    var reader = new EnvReader();
+    var source = FixtureTools.text("env/sample.env");
+
+    switch (reader.read(source)) {
+      case Success(document):
+        Assertions.assertEquals("env sample app name", "digigun.formats", document.getProperty("APP_NAME").value);
+        Assertions.assertEquals("env sample exported provider", true, document.getProperty("CI_PROVIDER").exported);
+        Assertions.assertTrue("env sample quoted targets contains eval", document.getProperty("SUPPORTED_TARGETS").value.indexOf("eval") >= 0);
+      case Failure(error):
+        Assertions.fail('Expected env sample fixture to succeed: ${error.toString()}');
     }
   }
 

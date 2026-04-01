@@ -5,18 +5,19 @@ import digigun.formats.csv.CsvCodec;
 import digigun.formats.csv.CsvDocument;
 import digigun.formats.csv.CsvReader;
 import test.Assertions;
+import test.FixtureTools;
 
 class CsvTests {
   public static function run():Void {
     testCsvParsing();
+    testCsvEdgeFixture();
     testCsvRoundTrip();
     testMutableCsvEditing();
     testInvalidCsv();
   }
 
   static function testCsvParsing():Void {
-    var source = 'name,quote
-digigun,"hello, world"';
+    var source = FixtureTools.text("csv/parse.csv");
     var reader = new CsvReader();
 
     switch (reader.read(source)) {
@@ -43,7 +44,7 @@ digigun,"hello, world"';
         "";
     };
 
-    Assertions.assertTrue("serialized csv includes comma", serialized.indexOf(",") >= 0);
+    Assertions.assertEquals("csv serialized fixture", FixtureTools.text("csv/serialize.csv"), serialized);
 
     switch (codec.read(serialized)) {
       case Success(parsed):
@@ -51,6 +52,20 @@ digigun,"hello, world"';
         Assertions.assertEquals("csv round trip value", "digigun", parsed.rows[1].cells[0].value);
       case Failure(error):
         Assertions.fail('Expected CSV round trip parse to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testCsvEdgeFixture():Void {
+    var reader = new CsvReader();
+    var source = FixtureTools.text("csv/edge.csv");
+
+    switch (reader.read(source)) {
+      case Success(document):
+        Assertions.assertEquals("csv edge row count", 2, document.rows.length);
+        Assertions.assertEquals("csv edge escaped quote", 'hello "world"', document.rows[1].cells[1].value);
+        Assertions.assertTrue("csv edge multiline cell", document.rows[1].cells[2].value.indexOf("\n") >= 0);
+      case Failure(error):
+        Assertions.fail('Expected CSV edge fixture to succeed: ${error.toString()}');
     }
   }
 

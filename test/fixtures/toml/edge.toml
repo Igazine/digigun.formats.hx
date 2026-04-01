@@ -1,0 +1,9 @@
+# edge cases
+title = "digigun.formats"
+empty = ""
+ports = [80, 443]
+flags = [true, false]
+
+[server]
+message = "hello # not comment"
+ratio = 1.25

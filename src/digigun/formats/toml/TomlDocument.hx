@@ -1,5 +1,7 @@
 package digigun.formats.toml;
 
+import digigun.formats.internal.StructuredDataTools;
+
 /**
  * Editable document model for the supported TOML subset.
  */
@@ -21,97 +23,67 @@ class TomlDocument {
    * Returns the first global property with the matching key, if present.
    */
   public function getGlobalProperty(key:String):Null<TomlProperty> {
-    for (property in globalProperties) {
-      if (property.key == key) {
-        return property;
-      }
-    }
-
-    return null;
+    return StructuredDataTools.findByStringKey(globalProperties, key, function(property) return property.key);
   }
 
   /**
    * Returns whether a global property with the given key exists.
    */
   public function hasGlobalProperty(key:String):Bool {
-    return getGlobalProperty(key) != null;
+    return StructuredDataTools.hasByStringKey(globalProperties, key, function(property) return property.key);
   }
 
   /**
    * Sets a global property value in place, creating the property when missing.
    */
   public function setGlobalProperty(key:String, value:TomlValue):TomlProperty {
-    var existing = getGlobalProperty(key);
-    if (existing != null) {
-      existing.value = value;
-      return existing;
-    }
-
-    var property = new TomlProperty(key, value);
-    globalProperties.push(property);
-    return property;
+    return StructuredDataTools.setByStringKey(
+      globalProperties,
+      key,
+      value,
+      function(property) return property.key,
+      function(property, nextValue) property.value = nextValue,
+      function(name, nextValue) return new TomlProperty(name, nextValue)
+    );
   }
 
   /**
    * Removes the first global property with the given key.
    */
   public function removeGlobalProperty(key:String):Bool {
-    for (index in 0...globalProperties.length) {
-      if (globalProperties[index].key == key) {
-        globalProperties.splice(index, 1);
-        return true;
-      }
-    }
-
-    return false;
+    return StructuredDataTools.removeByStringKey(globalProperties, key, function(property) return property.key);
   }
 
   /**
    * Returns the first table with the matching name, if present.
    */
   public function getTable(name:String):Null<TomlTable> {
-    for (table in tables) {
-      if (table.name == name) {
-        return table;
-      }
-    }
-
-    return null;
+    return StructuredDataTools.findByStringKey(tables, name, function(table) return table.name);
   }
 
   /**
    * Returns whether a table with the given name exists.
    */
   public function hasTable(name:String):Bool {
-    return getTable(name) != null;
+    return StructuredDataTools.hasByStringKey(tables, name, function(table) return table.name);
   }
 
   /**
    * Returns an existing table or creates one in place when it does not exist.
    */
   public function getOrCreateTable(name:String):TomlTable {
-    var existing = getTable(name);
-    if (existing != null) {
-      return existing;
-    }
-
-    var table = new TomlTable(name);
-    tables.push(table);
-    return table;
+    return StructuredDataTools.getOrCreateByMatch(
+      tables,
+      function(table) return table.name == name,
+      function() return new TomlTable(name)
+    );
   }
 
   /**
    * Removes the first table with the given name.
    */
   public function removeTable(name:String):Bool {
-    for (index in 0...tables.length) {
-      if (tables[index].name == name) {
-        tables.splice(index, 1);
-        return true;
-      }
-    }
-
-    return false;
+    return StructuredDataTools.removeByStringKey(tables, name, function(table) return table.name);
   }
 
   /**

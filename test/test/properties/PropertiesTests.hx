@@ -5,6 +5,7 @@ import digigun.formats.properties.PropertiesCodec;
 import digigun.formats.properties.PropertiesDocument;
 import digigun.formats.properties.PropertiesReader;
 import test.Assertions;
+import test.FixtureTools;
 
 class PropertiesTests {
   public static function run():Void {
@@ -16,9 +17,7 @@ class PropertiesTests {
 
   static function testPropertiesParsing():Void {
     var reader = new PropertiesReader();
-    var source = '# comment
-name=digigun
-theme:clean';
+    var source = FixtureTools.text("properties/parse.properties");
 
     switch (reader.read(source)) {
       case Success(document):
@@ -42,6 +41,8 @@ theme:clean';
         Assertions.fail('Expected properties write to succeed: ${error.toString()}');
         "";
     };
+
+    Assertions.assertEquals("properties serialized fixture", FixtureTools.text("properties/serialize.properties"), serialized);
 
     switch (codec.read(serialized)) {
       case Success(parsed):

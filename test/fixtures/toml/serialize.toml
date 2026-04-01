@@ -1,0 +1,6 @@
+title = "digigun.formats"
+ports = [80, 443]
+
+[server]
+enabled = true
+threshold = 2.5

@@ -7,10 +7,13 @@ import digigun.formats.yaml.YamlDocument;
 import digigun.formats.yaml.YamlObject;
 import digigun.formats.yaml.YamlReader;
 import test.Assertions;
+import test.FixtureTools;
 
 class YamlTests {
   public static function run():Void {
     testYamlParsing();
+    testYamlEdgeFixture();
+    testYamlSampleFixture();
     testYamlRoundTrip();
     testMutableYamlEditing();
     testInvalidYaml();
@@ -18,13 +21,7 @@ class YamlTests {
 
   static function testYamlParsing():Void {
     var reader = new YamlReader();
-    var source = 'name: digigun
-enabled: true
-server:
-  port: 8080
-  tags:
-    - alpha
-    - beta';
+    var source = FixtureTools.text("yaml/parse.yaml");
 
     switch (reader.read(source)) {
       case Success(document):
@@ -59,7 +56,7 @@ server:
         "";
     };
 
-    Assertions.assertTrue("serialized yaml includes nested key", serialized.indexOf("server:") >= 0);
+    Assertions.assertEquals("yaml serialized fixture", FixtureTools.text("yaml/serialize.yaml"), serialized);
 
     switch (codec.read(serialized)) {
       case Success(parsed):
@@ -68,6 +65,37 @@ server:
         Assertions.assertEquals("yaml round trip nested port", 8080, parsedRoot.getProperty("server").value.asObject().getProperty("port").value.asInt());
       case Failure(error):
         Assertions.fail('Expected YAML round trip parse to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testYamlEdgeFixture():Void {
+    var reader = new YamlReader();
+    var source = FixtureTools.text("yaml/edge.yaml");
+
+    switch (reader.read(source)) {
+      case Success(document):
+        var root = document.getRootObject();
+        Assertions.assertEquals("yaml edge quoted title", "digigun: formats", root.getProperty("title").value.asString());
+        Assertions.assertTrue("yaml edge null value", root.getProperty("empty").value.isNull());
+        Assertions.assertEquals("yaml edge notes size", 2, root.getProperty("notes").value.asArray().items.length);
+        Assertions.assertEquals("yaml edge nested owner", "digigun", root.getProperty("meta").value.asObject().getProperty("owner").value.asString());
+      case Failure(error):
+        Assertions.fail('Expected YAML edge fixture to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testYamlSampleFixture():Void {
+    var reader = new YamlReader();
+    var source = FixtureTools.text("yaml/sample.yaml");
+
+    switch (reader.read(source)) {
+      case Success(document):
+        var root = document.getRootObject();
+        Assertions.assertEquals("yaml sample maintainers size", 2, root.getProperty("maintainers").value.asArray().items.length);
+        Assertions.assertEquals("yaml sample meta version", "0.1.0", root.getProperty("meta").value.asObject().getProperty("version").value.asString());
+        Assertions.assertEquals("yaml sample targets size", 3, root.getProperty("meta").value.asObject().getProperty("targets").value.asArray().items.length);
+      case Failure(error):
+        Assertions.fail('Expected YAML sample fixture to succeed: ${error.toString()}');
     }
   }
 

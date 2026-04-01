@@ -1,0 +1,12 @@
+name: digigun.formats
+active: true
+maintainers:
+  - digigun
+  - contributors
+meta:
+  version: "0.1.0"
+  ci: github-actions
+  targets:
+    - js
+    - hl
+    - eval

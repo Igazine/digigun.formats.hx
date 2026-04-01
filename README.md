@@ -4,7 +4,7 @@
 cross-platform readers and writers for data and file formats.
 
 The library starts with a reusable codec abstraction and built-in INI, TOML,
-CSV, `.properties`, `.env`, and YAML implementations. It is designed for
+CSV, `.properties`, `.env`, YAML, MessagePack, NDJSON, and HCL2 implementations. It is designed for
 direct class usage rather than a global registry, keeping extension points
 simple and type-safe.
 
@@ -19,6 +19,9 @@ simple and type-safe.
 - CSV row and cell parsing with deterministic serialization
 - Editable `.properties` and `.env` documents
 - Writable YAML mappings and sequences for a supported subset
+- Binary MessagePack support for core scalar, array, map, and bytes types
+- NDJSON read/write support built on top of `haxe.Json`
+- HCL2 parsing and writing for a documented native syntax subset
 
 ## Install
 
@@ -32,6 +35,17 @@ haxelib dev digigun.formats.hx .
 haxe build.hxml
 haxe test.hxml
 ```
+
+Fixture-backed parser and serializer checks live under `test/fixtures/`.
+
+## Examples
+
+Small end-to-end examples live under `examples/`:
+
+- `examples/IniEditExample.hx` for read/edit/write config flow
+- `examples/MessagePackRoundTripExample.hx` for binary round-trip usage
+- `examples/NdjsonProcessExample.hx` for line-oriented JSON processing
+- `examples/HclYamlEditExample.hx` for block and mapping editing
 
 ## Basic usage
 
@@ -152,8 +166,81 @@ The built-in YAML codec supports a practical block-style subset:
 The YAML implementation intentionally does not yet cover anchors, tags, flow
 collections, multiline strings, or the full YAML specification.
 
+## MessagePack support
+
+The built-in MessagePack codec supports a practical binary subset:
+
+- `nil`, `Bool`, `Int`, `Float`, `String`, and `Bytes`
+- arrays and maps with nested values
+- mutable map and array editing
+- deterministic serialization for supported types
+
+The MessagePack implementation intentionally does not yet cover extension types
+or 64-bit integers outside the Haxe `Int` range.
+
+## NDJSON support
+
+The built-in NDJSON codec supports:
+
+- one JSON value per line
+- mutable record editing
+- serialization through `haxe.Json.stringify`
+- parsing through `haxe.Json.parse`
+
+This implementation intentionally delegates JSON semantics to the standard
+library instead of reimplementing JSON parsing or writing.
+
+## HCL2 support
+
+The built-in HCL2 codec supports a practical native-syntax subset:
+
+- attributes like `name = "value"`
+- blocks with labels like `source "amazon-ebs" "example" { ... }`
+- strings, numbers, booleans, `null`, arrays, and objects
+- heredoc strings such as `<<EOF ... EOF`
+- mutable block and attribute editing
+
+This implementation intentionally does not yet evaluate expressions, templates,
+function calls, traversals, or the full HCL language. It focuses on readable
+and writable configuration structures.
+
 ## Status
 
 This project is currently in early `0.1.x` development. The core API is
 designed to be stable enough for experimentation, but some format-specific
 details may still evolve as edge cases and additional use patterns are added.
+
+## Compatibility Policy
+
+During `0.1.x`, the project aims to keep these behaviors stable unless there is
+a strong correctness reason to change them:
+
+- core interface names and generic shapes such as `FormatReader`, `FormatWriter`, and `FormatCodec`
+- mutable editing method names once introduced
+- documented supported subsets for each format
+- fixture-backed serializer output for existing supported constructs
+
+The following may still change within `0.1.x` when needed:
+
+- unsupported or undocumented edge-case behavior
+- incomplete subset details for newer formats
+- internal helper structure and package-private implementation details
+
+## Release Checklist
+
+Before cutting a release:
+
+1. Run `haxe build.hxml`.
+2. Run `haxe test.hxml`.
+3. Review any changed fixture outputs intentionally.
+4. Update `README.md` if format support or guarantees changed.
+5. Update `CHANGELOG.md`.
+6. Create a version tag only after the API and fixture changes are understood.
+
+## Roadmap
+
+Short-term priorities:
+
+- continue expanding realistic fixtures and edge-case coverage
+- deepen selected format subsets where current support is intentionally limited
+- refine high-level helper APIs without destabilizing the core reader/writer contracts

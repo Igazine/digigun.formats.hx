@@ -1,0 +1,13 @@
+title = "digigun.formats"
+description = "Structured format toolkit"
+authors = ["digigun", "contributors"]
+
+[project]
+version = "0.1.0"
+stable = false
+max_targets = 9
+
+[ci]
+provider = "github-actions"
+enabled = true
+jobs = ["build", "test"]

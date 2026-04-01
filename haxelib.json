@@ -13,12 +13,15 @@
     "properties",
     "env",
     "yaml",
+    "msgpack",
+    "ndjson",
+    "hcl2",
     "cross"
   ],
   "description": "Strongly typed, cross-platform readers and writers for file and data formats.",
   "version": "0.1.0",
   "classPath": "src",
-  "releasenote": "Initial release with strongly typed core interfaces and INI support.",
+  "releasenote": "Initial 0.1.0 release with strongly typed readers/writers, mutable editing APIs, and built-in support for INI, TOML, CSV, .properties, .env, YAML, MessagePack, NDJSON, and HCL2 subsets.",
   "contributors": [
     "digigun"
   ]

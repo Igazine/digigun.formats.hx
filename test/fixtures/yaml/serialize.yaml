@@ -1,0 +1,7 @@
+name: digigun
+enabled: true
+server:
+  port: 8080
+  tags:
+    - alpha
+    - beta

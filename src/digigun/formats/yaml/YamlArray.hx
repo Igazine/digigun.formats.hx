@@ -1,5 +1,7 @@
 package digigun.formats.yaml;
 
+import digigun.formats.internal.StructuredDataTools;
+
 /**
  * Represents a mutable YAML sequence.
  */
@@ -18,7 +20,14 @@ class YamlArray {
    * Returns the item at the given index, if present.
    */
   public function get(index:Int):Null<YamlValue> {
-    return index >= 0 && index < items.length ? items[index] : null;
+    return StructuredDataTools.getAt(items, index);
+  }
+
+  /**
+   * Returns whether an item exists at the given index.
+   */
+  public function has(index:Int):Bool {
+    return StructuredDataTools.hasAt(items, index);
   }
 
   /**
@@ -33,22 +42,13 @@ class YamlArray {
    * Sets an item at the given index, expanding with null values when needed.
    */
   public function set(index:Int, value:YamlValue):YamlValue {
-    while (items.length <= index) {
-      items.push(YamlValues.nullValue());
-    }
-    items[index] = value;
-    return value;
+    return StructuredDataTools.setAt(items, index, value, YamlValues.nullValue);
   }
 
   /**
    * Removes the item at the given index.
    */
   public function remove(index:Int):Bool {
-    if (index < 0 || index >= items.length) {
-      return false;
-    }
-    items.splice(index, 1);
-    return true;
+    return StructuredDataTools.removeAt(items, index);
   }
 }
-

@@ -8,6 +8,7 @@ import digigun.formats.ini.IniReader;
 import digigun.formats.ini.IniSection;
 import digigun.formats.ini.IniValues;
 import test.Assertions;
+import test.FixtureTools;
 
 class IniTests {
   public static function run():Void {
@@ -20,14 +21,7 @@ class IniTests {
   }
 
   static function testIniParsing():Void {
-    var source = '; comment
-name = digigun
-
-[app]
-enabled = true
-retries = 3
-threshold = 2.5
-message = "hello world"';
+    var source = FixtureTools.text("ini/parse.ini");
     var reader = new IniReader();
 
     switch (reader.read(source)) {
@@ -55,7 +49,7 @@ message = "hello world"';
         "";
     };
 
-    Assertions.assertTrue("serialized includes section", serialized.indexOf("[app]") >= 0);
+    Assertions.assertEquals("ini serialized fixture", FixtureTools.text("ini/serialize.ini"), serialized);
 
     switch (codec.read(serialized)) {
       case Success(parsed):
