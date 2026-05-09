@@ -12,6 +12,10 @@
   heredoc parsing
 - Added rejection coverage for malformed TOML inline tables and malformed
   nested HCL object structure
+- Restricted TOML parsing to the documented bare-key subset for properties,
+  inline-table fields, and table names
+- Added YAML rejection coverage for mixed flow/block structure misuse
+- Added HCL rejection coverage for malformed array delimiters
 
 ## 0.2.0
 

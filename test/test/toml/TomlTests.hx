@@ -20,6 +20,7 @@ class TomlTests {
     testTomlRoundTrip();
     testNestedInlineTables();
     testInvalidTomlInlineTableStructure();
+    testUnsupportedTomlQuotedKeys();
     testInvalidToml();
     testTomlValueConversions();
     testImplicitValueConstruction();
@@ -133,6 +134,24 @@ class TomlTests {
         Assertions.assertEquals("invalid toml inline table code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected malformed TOML inline table to fail.");
+    }
+  }
+
+  static function testUnsupportedTomlQuotedKeys():Void {
+    var reader = new TomlReader();
+
+    switch (reader.read('"title" = "digigun"')) {
+      case Failure(error):
+        Assertions.assertEquals("unsupported toml quoted property key code", FormatErrorCode.UnsupportedFeature, error.code);
+      case Success(_):
+        Assertions.fail("Expected quoted TOML property key to fail.");
+    }
+
+    switch (reader.read('["server"]\nenabled = true')) {
+      case Failure(error):
+        Assertions.assertEquals("unsupported toml quoted table name code", FormatErrorCode.UnsupportedFeature, error.code);
+      case Success(_):
+        Assertions.fail("Expected quoted TOML table name to fail.");
     }
   }
 

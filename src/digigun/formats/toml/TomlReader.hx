@@ -47,6 +47,9 @@ class TomlReader implements FormatReader<String, TomlDocument> {
         if (tableName == "") {
           return Failure(error(FormatErrorCode.InvalidStructure, "Table name cannot be empty.", lineNumber, 1));
         }
+        if (!isSupportedKey(tableName)) {
+          return Failure(error(FormatErrorCode.UnsupportedFeature, 'Unsupported TOML table name "${tableName}". Quoted and non-bare table names are not supported in this version.', lineNumber, 1));
+        }
 
         tables.push(new TomlTable(tableName));
         currentTableIndex = tables.length - 1;
@@ -61,6 +64,9 @@ class TomlReader implements FormatReader<String, TomlDocument> {
       var key = trimmed.substr(0, delimiterIndex).trim();
       if (key == "") {
         return Failure(error(FormatErrorCode.InvalidStructure, "Property key cannot be empty.", lineNumber, 1));
+      }
+      if (!isSupportedKey(key)) {
+        return Failure(error(FormatErrorCode.UnsupportedFeature, 'Unsupported TOML key "${key}". Quoted and non-bare keys are not supported in this version.', lineNumber, 1));
       }
 
       var rawValue = trimmed.substr(delimiterIndex + 1).trim();
@@ -177,6 +183,12 @@ class TomlReader implements FormatReader<String, TomlDocument> {
           }
 
           var key = trimmed.substr(0, delimiterIndex).trim();
+          if (key == "") {
+            return Failure(error(FormatErrorCode.InvalidStructure, "TOML inline table key cannot be empty.", lineNumber, 1));
+          }
+          if (!isSupportedKey(key)) {
+            return Failure(error(FormatErrorCode.UnsupportedFeature, 'Unsupported TOML inline table key "${key}". Quoted and non-bare keys are not supported in this version.', lineNumber, 1));
+          }
           var rawValuePart = trimmed.substr(delimiterIndex + 1).trim();
           switch (parseValue(rawValuePart, lineNumber)) {
             case Failure(parseError):
@@ -337,6 +349,24 @@ class TomlReader implements FormatReader<String, TomlDocument> {
 
   function isInlineObject(value:String):Bool {
     return value.length >= 2 && value.charAt(0) == "{" && value.charAt(value.length - 1) == "}";
+  }
+
+  function isSupportedKey(value:String):Bool {
+    if (value == "" || TextFormatTools.isQuoted(value)) {
+      return false;
+    }
+
+    for (index in 0...value.length) {
+      var char = value.charAt(index);
+      var code = char.charCodeAt(0);
+      var isAlpha = (code >= "A".code && code <= "Z".code) || (code >= "a".code && code <= "z".code);
+      var isDigit = code >= "0".code && code <= "9".code;
+      if (!(isAlpha || isDigit || char == "_" || char == "-")) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   function isTable(value:String):Bool {

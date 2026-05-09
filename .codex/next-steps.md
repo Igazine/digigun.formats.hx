@@ -19,13 +19,17 @@
     flow collections
   - HCL nested object/array and trimmed heredoc coverage
   - TOML malformed inline-table rejection coverage
+  - TOML bare-key subset enforcement for property keys, inline-table keys, and
+    table names
   - YAML trailing-root-content rejection coverage
   - YAML malformed flow-syntax rejection and parser tightening
+  - YAML mixed flow/block misuse rejection coverage
   - HCL malformed nested-object rejection coverage
+  - HCL malformed array-delimiter rejection coverage
 - Remaining likely opportunities in this branch:
-  - TOML quoted-key and table-name subset clarification
   - YAML additional indentation and mixed flow/block rejection coverage
   - HCL malformed array/object delimiter edge rejection
+  - README subset wording refresh for the newly enforced TOML bare-key rule
 
 ## Known deferred work
 

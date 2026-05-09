@@ -21,6 +21,7 @@ class YamlTests {
     testInvalidYaml();
     testInvalidYamlTrailingRootContent();
     testInvalidYamlUnterminatedFlowCollection();
+    testInvalidYamlMixedFlowAndBlockStructure();
   }
 
   static function testYamlParsing():Void {
@@ -199,6 +200,16 @@ class YamlTests {
         Assertions.assertEquals("invalid yaml unterminated flow code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected unterminated YAML flow collection to fail.");
+    }
+  }
+
+  static function testInvalidYamlMixedFlowAndBlockStructure():Void {
+    var reader = new YamlReader();
+    switch (reader.read('meta: { owner: digigun\n  active: true }')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid yaml mixed flow and block code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected mixed flow/block YAML structure to fail.");
     }
   }
 }

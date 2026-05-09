@@ -11,6 +11,8 @@
   YAML string round-trip ambiguity in the writer.
 - The second hardening pass added rejection coverage and a YAML parser fix for
   trailing root content and malformed flow-looking scalars.
+- The third hardening pass tightened TOML subset enforcement to bare keys and
+  added more YAML/HCL malformed-structure coverage.
 
 ## Files intentionally changed for the text milestone
 

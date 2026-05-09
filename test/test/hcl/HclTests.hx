@@ -19,6 +19,7 @@ class HclTests {
     testMutableHclEditing();
     testInvalidHcl();
     testInvalidHclNestedObjectStructure();
+    testInvalidHclArrayDelimiter();
   }
 
   static function testHclParsing():Void {
@@ -157,6 +158,16 @@ class HclTests {
         Assertions.assertEquals("invalid hcl nested object code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected malformed nested HCL object to fail.");
+    }
+  }
+
+  static function testInvalidHclArrayDelimiter():Void {
+    var reader = new HclReader();
+    switch (reader.read("locals { values = [1 2] }")) {
+      case Failure(error):
+        Assertions.assertEquals("invalid hcl array delimiter code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected malformed HCL array delimiter usage to fail.");
     }
   }
 }
