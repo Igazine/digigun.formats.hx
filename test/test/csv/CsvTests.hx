@@ -16,6 +16,7 @@ class CsvTests {
     testMutableCsvEditing();
     testInvalidCsv();
     testInvalidCsvTrailingCharactersAfterQuote();
+    testInvalidCsvQuotedCellWithLeadingWhitespace();
   }
 
   static function testCsvParsing():Void {
@@ -127,6 +128,16 @@ class CsvTests {
         Assertions.assertEquals("invalid csv trailing characters after quote code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected trailing characters after closing CSV quote to fail.");
+    }
+  }
+
+  static function testInvalidCsvQuotedCellWithLeadingWhitespace():Void {
+    var reader = new CsvReader();
+    switch (reader.read('a, "b"')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid csv leading whitespace before quote code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected CSV quote after leading whitespace to fail.");
     }
   }
 }

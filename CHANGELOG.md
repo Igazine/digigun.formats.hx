@@ -10,6 +10,10 @@
 - Added CSV coverage for alternate delimiters and trailing empty cells
 - Tightened CSV parsing to reject trailing characters after a closing quoted
   cell
+- Added MessagePack rejection coverage for truncated nested array and map
+  payloads
+- Added NDJSON line-location coverage for invalid records after blank lines
+- Added CSV rejection coverage for quote usage after leading whitespace
 
 - Added TOML hardening coverage for nested inline tables and nested array/object
   combinations inside the supported inline-table subset

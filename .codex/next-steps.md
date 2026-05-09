@@ -20,9 +20,11 @@
   - CSV alternate-delimiter and trailing-empty-cell coverage
   - a CSV parser fix for trailing characters after closing quotes
 - Remaining likely opportunities on this branch:
-  - MessagePack malformed nested payload rejection coverage
-  - NDJSON invalid-line isolation and line-number precision checks
-  - CSV whitespace/quote-boundary subset clarification and rejection coverage
+  - MessagePack map-key subset clarification for helper APIs versus generic
+    binary map parsing
+  - NDJSON writer/reader contract clarification around blank lines and trailing
+    newlines
+  - CSV whitespace/quote-boundary subset clarification in README
 
 ## Current branch notes
 

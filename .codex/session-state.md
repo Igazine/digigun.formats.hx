@@ -19,6 +19,9 @@
 - The first pass on that branch added MessagePack nested/range coverage, fixed
   MessagePack float64 decoding, added NDJSON mixed-record coverage, and
   tightened CSV quoted-cell parsing.
+- The second pass on that branch added rejection coverage for malformed nested
+  MessagePack payloads, NDJSON error location after blank lines, and CSV quote
+  boundary misuse.
 
 ## Files intentionally changed for the text milestone
 

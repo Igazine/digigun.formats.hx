@@ -14,6 +14,7 @@ class NdjsonTests {
     testNdjsonBlankLinesAndMixedRecords();
     testMutableNdjsonEditing();
     testInvalidNdjson();
+    testInvalidNdjsonLocationAfterBlankLines();
   }
 
   static function testNdjsonParsing():Void {
@@ -92,6 +93,17 @@ class NdjsonTests {
         Assertions.assertEquals("invalid ndjson code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected malformed NDJSON to fail.");
+    }
+  }
+
+  static function testInvalidNdjsonLocationAfterBlankLines():Void {
+    var reader = new NdjsonReader();
+    switch (reader.read('\n{"name":"digigun"}\n\n{bad json}\ntrue')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid ndjson location line", 4, error.location.line);
+        Assertions.assertEquals("invalid ndjson location column", 1, error.location.column);
+      case Success(_):
+        Assertions.fail("Expected malformed NDJSON record after blank lines to fail.");
     }
   }
 }

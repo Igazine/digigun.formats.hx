@@ -20,6 +20,7 @@ class MessagePackTests {
     testMutableMessagePackEditing();
     testInvalidMessagePack();
     testUnsupportedMessagePackIntegerRanges();
+    testInvalidNestedMessagePackPayloads();
   }
 
   static function testMessagePackParsing():Void {
@@ -174,6 +175,24 @@ class MessagePackTests {
         Assertions.assertEquals("unsupported msgpack uint64 code", FormatErrorCode.UnsupportedFeature, error.code);
       case Success(_):
         Assertions.fail("Expected MessagePack uint64 to fail.");
+    }
+  }
+
+  static function testInvalidNestedMessagePackPayloads():Void {
+    var reader = new MessagePackReader();
+
+    switch (reader.read(Bytes.ofHex("9201"))) {
+      case Failure(error):
+        Assertions.assertEquals("invalid msgpack truncated array code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected truncated MessagePack array payload to fail.");
+    }
+
+    switch (reader.read(Bytes.ofHex("81a16b"))) {
+      case Failure(error):
+        Assertions.assertEquals("invalid msgpack truncated map value code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected truncated MessagePack map value to fail.");
     }
   }
 }
