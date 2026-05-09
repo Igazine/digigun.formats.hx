@@ -7,3 +7,4 @@ flags = [true, false]
 [server]
 message = "hello # not comment"
 ratio = 1.25
+metadata = { owner = "digigun", active = true }

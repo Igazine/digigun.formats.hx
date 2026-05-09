@@ -54,6 +54,8 @@ class TomlWriter implements FormatWriter<TomlDocument, String> {
         boolValue ? "true" : "false";
       case VArray(values):
         renderArray(values);
+      case VObject(objectValue):
+        renderObject(objectValue);
     };
   }
 
@@ -63,6 +65,14 @@ class TomlWriter implements FormatWriter<TomlDocument, String> {
       rendered.push(renderValue(value));
     }
     return '[${rendered.join(", ")}]';
+  }
+
+  function renderObject(value:TomlObject):String {
+    var rendered = new Array<String>();
+    for (field in value.fields) {
+      rendered.push('${field.key} = ${renderValue(field.value)}');
+    }
+    return '{ ${rendered.join(", ")} }';
   }
 
   function renderString(value:String):String {

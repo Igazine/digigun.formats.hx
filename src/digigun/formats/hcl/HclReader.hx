@@ -339,8 +339,8 @@ class HclReader implements FormatReader<String, HclDocument> {
       };
 
       skipTrivia();
-      if (peekChar() != "=") {
-        return Failure(error(FormatErrorCode.InvalidStructure, 'Expected "=" in HCL object field.'));
+      if (peekChar() != "=" && peekChar() != ":") {
+        return Failure(error(FormatErrorCode.InvalidStructure, 'Expected "=" or ":" in HCL object field.'));
       }
       advanceChar();
       skipTrivia();

@@ -3,6 +3,7 @@ package test.toml;
 import digigun.formats.FormatErrorCode;
 import digigun.formats.toml.TomlCodec;
 import digigun.formats.toml.TomlDocument;
+import digigun.formats.toml.TomlObject;
 import digigun.formats.toml.TomlProperty;
 import digigun.formats.toml.TomlReader;
 import digigun.formats.toml.TomlTable;
@@ -42,7 +43,7 @@ class TomlTests {
   static function testTomlRoundTrip():Void {
     var document = new TomlDocument(
       [new TomlProperty("title", "digigun.formats"), new TomlProperty("ports", [80, 443])],
-      [new TomlTable("server", [new TomlProperty("enabled", true), new TomlProperty("threshold", 2.5)])]
+      [new TomlTable("server", [new TomlProperty("enabled", true), new TomlProperty("threshold", 2.5), new TomlProperty("metadata", createMetadataObject())])]
     );
     var codec = new TomlCodec();
 
@@ -60,6 +61,7 @@ class TomlTests {
       case Success(parsed):
         Assertions.assertEquals("toml round trip global property count", 2, parsed.globalProperties.length);
         Assertions.assertEquals("toml round trip table count", 1, parsed.tables.length);
+        Assertions.assertEquals("toml round trip inline object field", "digigun", parsed.getTable("server").getProperty("metadata").value.asObject().getField("owner").value.asString());
       case Failure(error):
         Assertions.fail('Expected TOML round trip parse to succeed: ${error.toString()}');
     }
@@ -74,6 +76,7 @@ class TomlTests {
         Assertions.assertEquals("toml edge empty string", "", document.getGlobalProperty("empty").value.asString());
         Assertions.assertEquals("toml edge flags size", 2, document.getGlobalProperty("flags").value.asArray().length);
         Assertions.assertEquals("toml edge quoted hash", "hello # not comment", document.getTable("server").getProperty("message").value.asString());
+        Assertions.assertEquals("toml edge inline object owner", "digigun", document.getTable("server").getProperty("metadata").value.asObject().getField("owner").value.asString());
       case Failure(error):
         Assertions.fail('Expected TOML edge fixture to succeed: ${error.toString()}');
     }
@@ -127,14 +130,23 @@ class TomlTests {
 
     var table = document.getOrCreateTable("server");
     table.setProperty("ports", [80, 443]);
+    table.setProperty("metadata", createMetadataObject());
     table.setProperty("enabled", true);
     table.setProperty("enabled", false);
 
     Assertions.assertEquals("mutable toml global property", "digigun.formats", document.getGlobalProperty("title").value.asString());
     Assertions.assertEquals("mutable toml updated bool", false, table.getProperty("enabled").value.asBool());
     Assertions.assertEquals("mutable toml array size", 2, table.getProperty("ports").value.asArray().length);
+    Assertions.assertEquals("mutable toml object field", true, table.getProperty("metadata").value.asObject().getField("active").value.asBool());
     Assertions.assertTrue("mutable toml remove property", table.removeProperty("enabled"));
     Assertions.assertTrue("mutable toml remove table", document.removeTable("server"));
     Assertions.assertTrue("mutable toml table removed", !document.hasTable("server"));
+  }
+
+  static function createMetadataObject():TomlObject {
+    var objectValue = new TomlObject();
+    objectValue.setField("owner", "digigun");
+    objectValue.setField("active", true);
+    return objectValue;
   }
 }

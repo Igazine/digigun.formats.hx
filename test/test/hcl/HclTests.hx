@@ -39,14 +39,14 @@ class HclTests {
 
   static function testHclRoundTrip():Void {
     var document = new HclDocument();
-    var sourceBlock = document.body.addBlock("source", ["amazon-ebs", "example"]);
+    var sourceBlock = document.addBlock("source", ["amazon-ebs", "example"]);
     sourceBlock.body.setAttribute("ami_name", "example-ami");
     sourceBlock.body.setAttribute("instance_count", 2);
     var objectValue = new HclObject();
     objectValue.setField("owner", "digigun");
     sourceBlock.body.setAttribute("metadata", objectValue);
 
-    var buildBlock = document.body.addBlock("build");
+    var buildBlock = document.addBlock("build");
     buildBlock.body.setAttribute("sources", ["source.amazon-ebs.example"]);
     var codec = new HclCodec();
 
@@ -104,8 +104,8 @@ class HclTests {
 
   static function testMutableHclEditing():Void {
     var document = new HclDocument();
-    document.body.setAttribute("packer_required", true);
-    var buildBlock = document.body.getOrCreateBlock("build");
+    document.setAttribute("packer_required", true);
+    var buildBlock = document.getOrCreateBlock("build");
     buildBlock.body.setAttribute("name", "base-image");
     buildBlock.body.setAttribute("sources", ["source.amazon-ebs.example"]);
 
@@ -114,7 +114,7 @@ class HclTests {
     shellBlock.body.setAttribute("retries", 2);
     shellBlock.body.setAttribute("retries", 3);
 
-    Assertions.assertTrue("mutable hcl root attribute exists", document.body.hasAttribute("packer_required"));
+    Assertions.assertTrue("mutable hcl root attribute exists", document.getAttribute("packer_required") != null);
     Assertions.assertEquals("mutable hcl updated attribute", 3, shellBlock.body.getAttribute("retries").value.asInt());
     Assertions.assertTrue("mutable hcl remove attribute", shellBlock.body.removeAttribute("retries"));
     Assertions.assertTrue("mutable hcl remove block", buildBlock.body.removeBlock("provisioner", ["shell"]));

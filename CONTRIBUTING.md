@@ -7,7 +7,9 @@
    - `haxe build.hxml`
    - `haxe test.hxml`
 3. Add or update fixtures in `test/fixtures/` when parser or serializer behavior changes.
-4. Keep documentation and changelog entries aligned with any public API or format-support change.
+4. Keep `README.md`, `CHANGELOG.md`, `haxelib.json`, and any relevant
+   `./.codex` project memory files aligned with public API or format-support
+   changes.
 
 ## Fixture policy
 
@@ -23,3 +25,11 @@ This library favors practical, writable subsets over incomplete attempts at full
 - avoid hidden `Dynamic`-heavy behavior unless delegation to an external standard-library type is intentional
 - preserve cross-target compatibility
 - include mutable editing coverage where the format model supports it
+
+## Project memory
+
+- Use `./.codex/` for durable project notes that should survive Codex restarts.
+- Prefer structured Markdown with clear sections for assessment, decisions,
+  current status, deferred work, and next steps.
+- Update the relevant `./.codex` files whenever a milestone meaningfully changes
+  the project state or development priorities.

@@ -61,5 +61,27 @@ class MessagePackDocument {
     root = created;
     return created;
   }
-}
 
+  /**
+   * Returns the first string-keyed property when the root is a map.
+   */
+  public inline function getProperty(key:String):Null<MessagePackEntry> {
+    var mapValue = getRootMap();
+    return mapValue == null ? null : mapValue.getProperty(key);
+  }
+
+  /**
+   * Sets a string-keyed root property, creating the root map when needed.
+   */
+  public inline function setProperty(key:String, value:MessagePackValue):MessagePackEntry {
+    return getOrCreateRootMap().setProperty(key, value);
+  }
+
+  /**
+   * Removes a string-keyed root property when the root is a map.
+   */
+  public inline function removeProperty(key:String):Bool {
+    var mapValue = getRootMap();
+    return mapValue == null ? false : mapValue.removeProperty(key);
+  }
+}

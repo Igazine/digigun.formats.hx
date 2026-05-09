@@ -32,6 +32,11 @@ class TomlValues {
     return values;
   }
 
+  /** Wraps a TOML object as a `TomlValue`. */
+  public static function ofObject(value:TomlObject):TomlValue {
+    return value;
+  }
+
   /** Returns the value as a string when possible. */
   public static function asString(value:TomlValue):Null<String> {
     return value.asString();
@@ -55,5 +60,10 @@ class TomlValues {
   /** Returns the value as an array when possible. */
   public static function asArray(value:TomlValue):Null<Array<TomlValue>> {
     return value.asArray();
+  }
+
+  /** Returns the value as an object when possible. */
+  public static function asObject(value:TomlValue):Null<TomlObject> {
+    return value.asObject();
   }
 }

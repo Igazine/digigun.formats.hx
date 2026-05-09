@@ -78,6 +78,8 @@ class YamlTests {
         Assertions.assertEquals("yaml edge quoted title", "digigun: formats", root.getProperty("title").value.asString());
         Assertions.assertTrue("yaml edge null value", root.getProperty("empty").value.isNull());
         Assertions.assertEquals("yaml edge notes size", 2, root.getProperty("notes").value.asArray().items.length);
+        Assertions.assertEquals("yaml edge flow array size", 3, root.getProperty("flow_tags").value.asArray().items.length);
+        Assertions.assertEquals("yaml edge flow object bool", true, root.getProperty("flow_meta").value.asObject().getProperty("active").value.asBool());
         Assertions.assertEquals("yaml edge nested owner", "digigun", root.getProperty("meta").value.asObject().getProperty("owner").value.asString());
       case Failure(error):
         Assertions.fail('Expected YAML edge fixture to succeed: ${error.toString()}');
@@ -102,12 +104,12 @@ class YamlTests {
   static function testMutableYamlEditing():Void {
     var document = new YamlDocument();
     var root = document.getOrCreateRootObject();
-    root.setProperty("name", "digigun");
-    root.setProperty("enabled", true);
+    document.setProperty("name", "digigun");
+    document.setProperty("enabled", true);
 
     var server = new YamlObject();
     server.setProperty("port", 8080);
-    root.setProperty("server", server);
+    document.setProperty("server", server);
 
     var tags = new YamlArray();
     tags.add("alpha");
@@ -116,8 +118,8 @@ class YamlTests {
     tags.set(1, "stable");
 
     Assertions.assertEquals("mutable yaml updated array value", "stable", server.getProperty("tags").value.asArray().get(1).asString());
-    Assertions.assertTrue("mutable yaml remove property", root.removeProperty("enabled"));
-    Assertions.assertTrue("mutable yaml property removed", !root.hasProperty("enabled"));
+    Assertions.assertTrue("mutable yaml remove property", document.removeProperty("enabled"));
+    Assertions.assertTrue("mutable yaml property removed", document.getProperty("enabled") == null);
   }
 
   static function testInvalidYaml():Void {

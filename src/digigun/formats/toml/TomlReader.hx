@@ -94,6 +94,10 @@ class TomlReader implements FormatReader<String, TomlDocument> {
       return parseArray(rawValue, lineNumber);
     }
 
+    if (isInlineObject(rawValue)) {
+      return parseInlineObject(rawValue, lineNumber);
+    }
+
     var lower = rawValue.toLowerCase();
     if (lower == "true") {
       return Success(true);
@@ -153,10 +157,47 @@ class TomlReader implements FormatReader<String, TomlDocument> {
     }
   }
 
+  function parseInlineObject(rawValue:String, lineNumber:Int):FormatResult<TomlValue> {
+    var content = rawValue.substr(1, rawValue.length - 2).trim();
+    var object = new TomlObject();
+    if (content == "") {
+      return Success(object);
+    }
+
+    var parts = splitDelimitedItems(content, lineNumber, "{", "}");
+    switch (parts) {
+      case Failure(errorValue):
+        return Failure(errorValue);
+      case Success(items):
+        for (item in items) {
+          var trimmed = item.trim();
+          var delimiterIndex = findKeyValueDelimiter(trimmed);
+          if (delimiterIndex < 1) {
+            return Failure(error(FormatErrorCode.InvalidStructure, "Expected key = value entry in TOML inline table.", lineNumber, 1));
+          }
+
+          var key = trimmed.substr(0, delimiterIndex).trim();
+          var rawValuePart = trimmed.substr(delimiterIndex + 1).trim();
+          switch (parseValue(rawValuePart, lineNumber)) {
+            case Failure(parseError):
+              return Failure(parseError);
+            case Success(parsedValue):
+              object.setField(key, parsedValue);
+          }
+        }
+        return Success(object);
+    }
+  }
+
   function splitArrayItems(content:String, lineNumber:Int):FormatResult<Array<String>> {
+    return splitDelimitedItems(content, lineNumber, "[", "]");
+  }
+
+  function splitDelimitedItems(content:String, lineNumber:Int, openChar:String, closeChar:String):FormatResult<Array<String>> {
     var items = new Array<String>();
     var current = new StringBuf();
-    var depth = 0;
+    var bracketDepth = 0;
+    var braceDepth = 0;
     var quote:Null<String> = null;
     var escaping = false;
 
@@ -180,16 +221,25 @@ class TomlReader implements FormatReader<String, TomlDocument> {
           quote = char;
           current.add(char);
         case "[":
-          depth++;
+          bracketDepth++;
           current.add(char);
         case "]":
-          if (depth == 0) {
+          if (closeChar == "]" && bracketDepth == 0 && braceDepth == 0) {
             return Failure(error(FormatErrorCode.InvalidStructure, "Unexpected closing bracket in array.", lineNumber, index + 1));
           }
-          depth--;
+          bracketDepth--;
+          current.add(char);
+        case "{":
+          braceDepth++;
+          current.add(char);
+        case "}":
+          if (closeChar == "}" && braceDepth == 0 && bracketDepth == 0) {
+            return Failure(error(FormatErrorCode.InvalidStructure, "Unexpected closing brace in inline table.", lineNumber, index + 1));
+          }
+          braceDepth--;
           current.add(char);
         case ",":
-          if (depth == 0) {
+          if (bracketDepth == 0 && braceDepth == 0) {
             items.push(current.toString());
             current = new StringBuf();
           } else {
@@ -200,8 +250,8 @@ class TomlReader implements FormatReader<String, TomlDocument> {
       }
     }
 
-    if (quote != null || depth != 0) {
-      return Failure(error(FormatErrorCode.InvalidStructure, "Unterminated TOML array.", lineNumber, 1));
+    if (quote != null || bracketDepth != 0 || braceDepth != 0) {
+      return Failure(error(FormatErrorCode.InvalidStructure, "Unterminated TOML collection literal.", lineNumber, 1));
     }
 
     items.push(current.toString());
@@ -283,6 +333,10 @@ class TomlReader implements FormatReader<String, TomlDocument> {
 
   function isArray(value:String):Bool {
     return value.length >= 2 && value.charAt(0) == "[" && value.charAt(value.length - 1) == "]";
+  }
+
+  function isInlineObject(value:String):Bool {
+    return value.length >= 2 && value.charAt(0) == "{" && value.charAt(value.length - 1) == "}";
   }
 
   function isTable(value:String):Bool {

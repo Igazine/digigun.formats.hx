@@ -19,10 +19,10 @@
     "cross"
   ],
   "description": "Strongly typed, cross-platform readers and writers for file and data formats.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "classPath": "src",
-  "releasenote": "Initial 0.1.0 release with strongly typed readers/writers, mutable editing APIs, and built-in support for INI, TOML, CSV, .properties, .env, YAML, MessagePack, NDJSON, and HCL2 subsets.",
+  "releasenote": "First major development milestone for the text-format surface, including fixture-backed stabilization work for TOML inline tables, YAML flow collections, HCL object parsing, and document-level editing helpers.",
   "contributors": [
-    "digigun"
+    "Igazine"
   ]
 }

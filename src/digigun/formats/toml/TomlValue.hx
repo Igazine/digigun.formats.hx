@@ -9,6 +9,7 @@ enum TomlValueData {
   VFloat(value:Float);
   VBool(value:Bool);
   VArray(values:Array<TomlValue>);
+  VObject(value:TomlObject);
 }
 
 /**
@@ -36,6 +37,10 @@ abstract TomlValue(TomlValueData) from TomlValueData {
 
   @:from public static inline function fromBool(value:Bool):TomlValue {
     return cast VBool(value);
+  }
+
+  @:from public static inline function fromObject(value:TomlObject):TomlValue {
+    return cast VObject(value);
   }
 
   @:from public static inline function fromValueArray(values:Array<TomlValue>):TomlValue {
@@ -87,7 +92,7 @@ abstract TomlValue(TomlValueData) from TomlValueData {
         Std.string(value);
       case VBool(value):
         value ? "true" : "false";
-      case VArray(_):
+      case VArray(_) | VObject(_):
         null;
     };
   }
@@ -137,6 +142,18 @@ abstract TomlValue(TomlValueData) from TomlValueData {
     return switch ((this : TomlValueData)) {
       case VArray(values):
         values.copy();
+      case _:
+        null;
+    };
+  }
+
+  /**
+   * Returns the value as an inline table when it is backed by a TOML object.
+   */
+  public inline function asObject():Null<TomlObject> {
+    return switch ((this : TomlValueData)) {
+      case VObject(value):
+        value;
       case _:
         null;
     };

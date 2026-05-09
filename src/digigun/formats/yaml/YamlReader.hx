@@ -177,6 +177,14 @@ class YamlReader implements FormatReader<String, YamlDocument> {
   }
 
   function parseScalar(rawValue:String, line:Int, column:Int):FormatResult<YamlValue> {
+    if (isFlowArray(rawValue)) {
+      return parseFlowArray(rawValue, line);
+    }
+
+    if (isFlowObject(rawValue)) {
+      return parseFlowObject(rawValue, line);
+    }
+
     if (TextFormatTools.isQuoted(rawValue)) {
       var quote = rawValue.charAt(0);
       return Success(TextFormatTools.unescape(rawValue.substr(1, rawValue.length - 2), quote));
@@ -208,6 +216,119 @@ class YamlReader implements FormatReader<String, YamlDocument> {
     }
 
     return Success(rawValue);
+  }
+
+  function parseFlowArray(rawValue:String, line:Int):FormatResult<YamlValue> {
+    var content = rawValue.substr(1, rawValue.length - 2).trim();
+    var value = new YamlArray();
+    if (content == "") {
+      return Success(value);
+    }
+
+    var items = splitFlowItems(content, line);
+    switch (items) {
+      case Failure(errorValue):
+        return Failure(errorValue);
+      case Success(parts):
+        for (part in parts) {
+          switch (parseScalar(part.trim(), line, 1)) {
+            case Failure(parseError):
+              return Failure(parseError);
+            case Success(parsedValue):
+              value.add(parsedValue);
+          }
+        }
+        return Success(value);
+    }
+  }
+
+  function parseFlowObject(rawValue:String, line:Int):FormatResult<YamlValue> {
+    var content = rawValue.substr(1, rawValue.length - 2).trim();
+    var value = new YamlObject();
+    if (content == "") {
+      return Success(value);
+    }
+
+    var items = splitFlowItems(content, line);
+    switch (items) {
+      case Failure(errorValue):
+        return Failure(errorValue);
+      case Success(parts):
+        for (part in parts) {
+          var separatorIndex = findMappingSeparator(part);
+          if (separatorIndex < 1) {
+            return Failure(error("Expected key: value entry in YAML flow mapping.", line, 1));
+          }
+
+          var key = part.substr(0, separatorIndex).trim();
+          var rawPartValue = part.substr(separatorIndex + 1).trim();
+          switch (parseScalar(rawPartValue, line, 1)) {
+            case Failure(parseError):
+              return Failure(parseError);
+            case Success(parsedValue):
+              value.setProperty(key, parsedValue);
+          }
+        }
+        return Success(value);
+    }
+  }
+
+  function splitFlowItems(content:String, line:Int):FormatResult<Array<String>> {
+    var items = new Array<String>();
+    var current = new StringBuf();
+    var bracketDepth = 0;
+    var braceDepth = 0;
+    var quote:Null<String> = null;
+    var escaping = false;
+
+    for (index in 0...content.length) {
+      var char = content.charAt(index);
+      if (quote != null) {
+        current.add(char);
+        if (escaping) {
+          escaping = false;
+        } else if (char == "\\") {
+          escaping = true;
+        } else if (char == quote) {
+          quote = null;
+        }
+        continue;
+      }
+
+      switch (char) {
+        case "\"", "'":
+          quote = char;
+          current.add(char);
+        case "[":
+          bracketDepth++;
+          current.add(char);
+        case "]":
+          bracketDepth--;
+          current.add(char);
+        case "{":
+          braceDepth++;
+          current.add(char);
+        case "}":
+          braceDepth--;
+          current.add(char);
+        case ",":
+          if (bracketDepth == 0 && braceDepth == 0) {
+            items.push(current.toString());
+            current = new StringBuf();
+          } else {
+            current.add(char);
+          }
+        default:
+          current.add(char);
+      }
+    }
+
+    if (quote != null || bracketDepth != 0 || braceDepth != 0) {
+      return Failure(error("Unterminated YAML flow collection.", line, 1));
+    }
+
+    items.push(current.toString());
+    return Success(items);
   }
 
   function findMappingSeparator(value:String):Int {
@@ -292,6 +413,14 @@ class YamlReader implements FormatReader<String, YamlDocument> {
     return index;
   }
 
+  inline function isFlowArray(value:String):Bool {
+    return value.length >= 2 && value.charAt(0) == "[" && value.charAt(value.length - 1) == "]";
+  }
+
+  inline function isFlowObject(value:String):Bool {
+    return value.length >= 2 && value.charAt(0) == "{" && value.charAt(value.length - 1) == "}";
+  }
+
   inline function error(message:String, line:Int, column:Int):FormatError {
     return new FormatError(FormatErrorCode.InvalidStructure, message, new FormatLocation(line, column), YamlFormat.id);
   }
@@ -301,4 +430,3 @@ private typedef YamlParseResult = {
   var value:YamlValue;
   var nextIndex:Int;
 }
-

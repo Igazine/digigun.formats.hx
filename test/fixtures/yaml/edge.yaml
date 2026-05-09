@@ -3,6 +3,8 @@ empty: null
 notes:
   - "hello # still text"
   - null
+flow_tags: [alpha, "beta:2", null]
+flow_meta: { owner: digigun, active: true }
 meta:
   owner: digigun
   active: false

@@ -7,7 +7,7 @@ line two
 EOF
   tags = ["base", "stable"]
   metadata = {
-    owner = "digigun"
-    active = true
+    owner: "digigun"
+    active: true
   }
 }

@@ -63,4 +63,27 @@ class YamlDocument {
     root = created;
     return created;
   }
+
+  /**
+   * Returns the first root property with the given key when the root is a mapping.
+   */
+  public inline function getProperty(key:String):Null<YamlProperty> {
+    var objectValue = getRootObject();
+    return objectValue == null ? null : objectValue.getProperty(key);
+  }
+
+  /**
+   * Sets a root property, creating the root mapping when needed.
+   */
+  public inline function setProperty(key:String, value:YamlValue):YamlProperty {
+    return getOrCreateRootObject().setProperty(key, value);
+  }
+
+  /**
+   * Removes a root property when the root is a mapping.
+   */
+  public inline function removeProperty(key:String):Bool {
+    var objectValue = getRootObject();
+    return objectValue == null ? false : objectValue.removeProperty(key);
+  }
 }

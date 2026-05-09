@@ -3,10 +3,10 @@
 `digigun.formats.hx` is a pure-Haxe `haxelib` for building strongly typed,
 cross-platform readers and writers for data and file formats.
 
-The library starts with a reusable codec abstraction and built-in INI, TOML,
-CSV, `.properties`, `.env`, YAML, MessagePack, NDJSON, and HCL2 implementations. It is designed for
-direct class usage rather than a global registry, keeping extension points
-simple and type-safe.
+The library currently focuses on a reusable codec abstraction and built-in INI,
+TOML, CSV, `.properties`, `.env`, YAML, MessagePack, NDJSON, and HCL2
+implementations. It is designed for direct class usage rather than a global
+registry, keeping extension points simple and type-safe.
 
 ## Features
 
@@ -120,10 +120,11 @@ The built-in TOML codec supports a practical typed subset:
 - named tables like `[server]`
 - scalar values inferred as `String`, `Int`, `Float`, or `Bool`
 - arrays with nested scalar and array values
+- inline tables such as `{ owner = "digigun", active = true }`
 - deterministic serialization of the typed document model
 
 The TOML implementation intentionally does not yet cover every TOML feature,
-such as inline tables, array-of-tables, dates, and multiline strings.
+such as array-of-tables, dates, and multiline strings.
 
 ## CSV support
 
@@ -159,12 +160,14 @@ The built-in YAML codec supports a practical block-style subset:
 
 - mappings with scalar or nested values
 - sequences with scalar or nested values
+- flow-style arrays such as `[alpha, "beta:2", null]`
+- flow-style objects such as `{ owner: digigun, active: true }`
 - scalar values inferred as `String`, `Int`, `Float`, `Bool`, or `null`
 - mutable object and array editing
 - deterministic serialization with two-space indentation
 
-The YAML implementation intentionally does not yet cover anchors, tags, flow
-collections, multiline strings, or the full YAML specification.
+The YAML implementation intentionally does not yet cover anchors, tags,
+multiline strings, or the full YAML specification.
 
 ## MessagePack support
 
@@ -197,6 +200,7 @@ The built-in HCL2 codec supports a practical native-syntax subset:
 - attributes like `name = "value"`
 - blocks with labels like `source "amazon-ebs" "example" { ... }`
 - strings, numbers, booleans, `null`, arrays, and objects
+- object fields using either `=` or `:`
 - heredoc strings such as `<<EOF ... EOF`
 - mutable block and attribute editing
 
@@ -206,24 +210,25 @@ and writable configuration structures.
 
 ## Status
 
-This project is currently in early `0.1.x` development. The core API is
-designed to be stable enough for experimentation, but some format-specific
-details may still evolve as edge cases and additional use patterns are added.
+This project is currently in early `0.2.x` development. The `v0.2.0` milestone
+stabilizes the text-format surface and its fixture-backed tests while keeping
+format-specific subsets explicit.
 
 ## Compatibility Policy
 
-During `0.1.x`, the project aims to keep these behaviors stable unless there is
+During `0.2.x`, the project aims to keep these behaviors stable unless there is
 a strong correctness reason to change them:
 
-- core interface names and generic shapes such as `FormatReader`, `FormatWriter`, and `FormatCodec`
+- core interface names and generic shapes such as `FormatReader`,
+  `FormatWriter`, and `FormatCodec`
 - mutable editing method names once introduced
 - documented supported subsets for each format
 - fixture-backed serializer output for existing supported constructs
 
-The following may still change within `0.1.x` when needed:
+The following may still change within `0.2.x` when needed:
 
 - unsupported or undocumented edge-case behavior
-- incomplete subset details for newer formats
+- incomplete subset details for specific formats
 - internal helper structure and package-private implementation details
 
 ## Release Checklist
@@ -233,14 +238,17 @@ Before cutting a release:
 1. Run `haxe build.hxml`.
 2. Run `haxe test.hxml`.
 3. Review any changed fixture outputs intentionally.
-4. Update `README.md` if format support or guarantees changed.
-5. Update `CHANGELOG.md`.
+4. Update `README.md`, `CHANGELOG.md`, and `haxelib.json` if format support or
+   guarantees changed.
+5. Update `./.codex` project memory so future sessions can resume with the
+   current assessment and decisions.
 6. Create a version tag only after the API and fixture changes are understood.
 
 ## Roadmap
 
 Short-term priorities:
 
-- continue expanding realistic fixtures and edge-case coverage
-- deepen selected format subsets where current support is intentionally limited
-- refine high-level helper APIs without destabilizing the core reader/writer contracts
+- continue expanding realistic fixtures and edge-case coverage for text formats
+- deepen selected text-format subsets where support is intentionally limited
+- refine high-level helper APIs without destabilizing the core reader/writer
+  contracts

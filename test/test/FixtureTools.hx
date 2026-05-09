@@ -1,5 +1,7 @@
 package test;
 
+import haxe.io.Bytes;
+
 using StringTools;
 
 class FixtureTools {
@@ -20,5 +22,9 @@ class FixtureTools {
   public static function hex(path:String):String {
     var content = text(path);
     return content.split("\n").join("").split(" ").join("").toLowerCase();
+  }
+
+  public static function bytes(path:String):Bytes {
+    return Bytes.ofHex(hex(path));
   }
 }

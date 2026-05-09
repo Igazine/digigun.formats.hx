@@ -86,24 +86,24 @@ class MessagePackTests {
   static function testMutableMessagePackEditing():Void {
     var document = new MessagePackDocument();
     var root = document.getOrCreateRootMap();
-    root.setProperty("name", "digigun");
-    root.setProperty("count", 2);
+    document.setProperty("name", "digigun");
+    document.setProperty("count", 2);
 
     var array = new MessagePackArray();
     array.add("alpha");
     array.add("beta");
-    root.setProperty("tags", array);
+    document.setProperty("tags", array);
     array.set(1, "stable");
 
     var nested = new MessagePackMap();
     nested.setProperty("enabled", true);
-    root.setProperty("meta", nested);
+    document.setProperty("meta", nested);
 
-    Assertions.assertTrue("msgpack has property", root.hasProperty("name"));
-    Assertions.assertEquals("msgpack mutated array item", "stable", root.getProperty("tags").value.asArray().get(1).asString());
-    Assertions.assertEquals("msgpack nested bool", true, root.getProperty("meta").value.asMap().getProperty("enabled").value.asBool());
-    Assertions.assertTrue("msgpack remove property", root.removeProperty("count"));
-    Assertions.assertTrue("msgpack property removed", !root.hasProperty("count"));
+    Assertions.assertTrue("msgpack has property", document.getProperty("name") != null);
+    Assertions.assertEquals("msgpack mutated array item", "stable", document.getProperty("tags").value.asArray().get(1).asString());
+    Assertions.assertEquals("msgpack nested bool", true, document.getProperty("meta").value.asMap().getProperty("enabled").value.asBool());
+    Assertions.assertTrue("msgpack remove property", document.removeProperty("count"));
+    Assertions.assertTrue("msgpack property removed", document.getProperty("count") == null);
   }
 
   static function testInvalidMessagePack():Void {
