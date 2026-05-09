@@ -116,15 +116,16 @@ every variant in the wild.
 The built-in TOML codec supports a practical typed subset:
 
 - comments starting with `#`
-- top-level key/value pairs
-- named tables like `[server]`
+- top-level key/value pairs with bare keys
+- named tables like `[server]` using bare table names
 - scalar values inferred as `String`, `Int`, `Float`, or `Bool`
 - arrays with nested scalar and array values
-- inline tables such as `{ owner = "digigun", active = true }`
+- inline tables such as `{ owner = "digigun", active = true }` with bare keys
 - deterministic serialization of the typed document model
 
 The TOML implementation intentionally does not yet cover every TOML feature,
-such as array-of-tables, dates, and multiline strings.
+such as quoted keys, dotted keys, array-of-tables, dates, and multiline
+strings.
 
 ## CSV support
 
@@ -167,7 +168,8 @@ The built-in YAML codec supports a practical block-style subset:
 - deterministic serialization with two-space indentation
 
 The YAML implementation intentionally does not yet cover anchors, tags,
-multiline strings, or the full YAML specification.
+multiline strings, arbitrary flow/block mixing beyond the documented subset, or
+the full YAML specification.
 
 ## MessagePack support
 
@@ -206,7 +208,7 @@ The built-in HCL2 codec supports a practical native-syntax subset:
 
 This implementation intentionally does not yet evaluate expressions, templates,
 function calls, traversals, or the full HCL language. It focuses on readable
-and writable configuration structures.
+and writable configuration structures for literal-only configuration data.
 
 ## Status
 

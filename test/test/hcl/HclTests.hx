@@ -20,6 +20,7 @@ class HclTests {
     testInvalidHcl();
     testInvalidHclNestedObjectStructure();
     testInvalidHclArrayDelimiter();
+    testInvalidHclObjectDelimiter();
   }
 
   static function testHclParsing():Void {
@@ -168,6 +169,16 @@ class HclTests {
         Assertions.assertEquals("invalid hcl array delimiter code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected malformed HCL array delimiter usage to fail.");
+    }
+  }
+
+  static function testInvalidHclObjectDelimiter():Void {
+    var reader = new HclReader();
+    switch (reader.read('locals { config = { owner = "digigun" : true } }')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid hcl object delimiter code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected malformed HCL object delimiter usage to fail.");
     }
   }
 }

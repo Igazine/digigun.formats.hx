@@ -27,9 +27,9 @@
   - HCL malformed nested-object rejection coverage
   - HCL malformed array-delimiter rejection coverage
 - Remaining likely opportunities in this branch:
-  - YAML additional indentation and mixed flow/block rejection coverage
-  - HCL malformed array/object delimiter edge rejection
-  - README subset wording refresh for the newly enforced TOML bare-key rule
+  - likely branch wrap-up after the README subset wording refresh and the
+    latest YAML/HCL delimiter coverage
+  - optional extra TOML invalid-structure cases if a concrete gap appears
 
 ## Known deferred work
 

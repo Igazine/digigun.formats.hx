@@ -22,6 +22,7 @@ class YamlTests {
     testInvalidYamlTrailingRootContent();
     testInvalidYamlUnterminatedFlowCollection();
     testInvalidYamlMixedFlowAndBlockStructure();
+    testInvalidYamlUnexpectedSequenceIndentation();
   }
 
   static function testYamlParsing():Void {
@@ -210,6 +211,16 @@ class YamlTests {
         Assertions.assertEquals("invalid yaml mixed flow and block code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected mixed flow/block YAML structure to fail.");
+    }
+  }
+
+  static function testInvalidYamlUnexpectedSequenceIndentation():Void {
+    var reader = new YamlReader();
+    switch (reader.read("meta:\n  owner: digigun\n   - invalid")) {
+      case Failure(error):
+        Assertions.assertEquals("invalid yaml unexpected sequence indentation code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected unexpectedly indented YAML sequence entry to fail.");
     }
   }
 }

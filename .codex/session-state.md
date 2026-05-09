@@ -13,6 +13,8 @@
   trailing root content and malformed flow-looking scalars.
 - The third hardening pass tightened TOML subset enforcement to bare keys and
   added more YAML/HCL malformed-structure coverage.
+- The current pass aligned README subset wording with the enforced TOML rules
+  and added final YAML indentation and HCL object-delimiter rejection coverage.
 
 ## Files intentionally changed for the text milestone
 

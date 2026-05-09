@@ -15,7 +15,9 @@
 - Restricted TOML parsing to the documented bare-key subset for properties,
   inline-table fields, and table names
 - Added YAML rejection coverage for mixed flow/block structure misuse
+- Added YAML rejection coverage for unexpected sequence indentation
 - Added HCL rejection coverage for malformed array delimiters
+- Added HCL rejection coverage for malformed object delimiters
 
 ## 0.2.0
 
