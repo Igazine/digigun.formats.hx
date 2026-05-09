@@ -30,6 +30,7 @@ class CsvReader implements FormatReader<String, CsvDocument> {
     var currentRow = new Array<CsvCell>();
     var currentCell = new StringBuf();
     var inQuotes = false;
+    var justClosedQuotedCell = false;
     var line = 1;
     var column = 1;
     var index = 0;
@@ -48,6 +49,7 @@ class CsvReader implements FormatReader<String, CsvDocument> {
           }
 
           inQuotes = false;
+          justClosedQuotedCell = true;
           index++;
           column++;
           continue;
@@ -62,6 +64,31 @@ class CsvReader implements FormatReader<String, CsvDocument> {
         }
         index++;
         continue;
+      }
+
+      if (justClosedQuotedCell) {
+        if (char == delimiter) {
+          currentRow.push(new CsvCell(currentCell.toString()));
+          currentCell = new StringBuf();
+          justClosedQuotedCell = false;
+          index++;
+          column++;
+          continue;
+        }
+
+        if (char == "\n") {
+          currentRow.push(new CsvCell(currentCell.toString()));
+          rows.push(new CsvRow(currentRow));
+          currentRow = [];
+          currentCell = new StringBuf();
+          justClosedQuotedCell = false;
+          index++;
+          line++;
+          column = 1;
+          continue;
+        }
+
+        return Failure(error("Unexpected characters after closing quoted CSV cell.", line, column));
       }
 
       if (char == "\"") {
@@ -102,6 +129,11 @@ class CsvReader implements FormatReader<String, CsvDocument> {
       return Failure(error("Unterminated quoted CSV cell.", line, column));
     }
 
+    if (justClosedQuotedCell) {
+      currentRow.push(new CsvCell(currentCell.toString()));
+      currentCell = new StringBuf();
+    }
+
     if (currentCell.toString() != "" || currentRow.length > 0 || normalized == "") {
       currentRow.push(new CsvCell(currentCell.toString()));
       rows.push(new CsvRow(currentRow));
@@ -118,4 +150,3 @@ class CsvReader implements FormatReader<String, CsvDocument> {
     return new FormatError(FormatErrorCode.InvalidStructure, message, new FormatLocation(line, column), CsvFormat.id);
   }
 }
-

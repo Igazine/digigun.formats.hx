@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Began `text-hardening/msgpack-ndjson-csv`
+- Added nested MessagePack structure coverage and unsupported integer-range
+  coverage
+- Fixed MessagePack `float64` decoding to reconstruct doubles correctly
+- Added NDJSON coverage for blank lines and mixed primitive/object records
+- Added CSV coverage for alternate delimiters and trailing empty cells
+- Tightened CSV parsing to reject trailing characters after a closing quoted
+  cell
+
 - Added TOML hardening coverage for nested inline tables and nested array/object
   combinations inside the supported inline-table subset
 - Added YAML hardening coverage for nested flow collections and fixed scalar

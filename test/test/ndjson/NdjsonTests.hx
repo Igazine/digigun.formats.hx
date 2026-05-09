@@ -11,6 +11,7 @@ class NdjsonTests {
   public static function run():Void {
     testNdjsonParsing();
     testNdjsonRoundTrip();
+    testNdjsonBlankLinesAndMixedRecords();
     testMutableNdjsonEditing();
     testInvalidNdjson();
   }
@@ -66,6 +67,22 @@ class NdjsonTests {
     Assertions.assertEquals("ndjson edited object field", "igazine", Reflect.field(document.getRecord(0), "name"));
     Assertions.assertTrue("ndjson remove record", document.removeRecord(1));
     Assertions.assertTrue("ndjson record removed", !document.hasRecord(1));
+  }
+
+  static function testNdjsonBlankLinesAndMixedRecords():Void {
+    var reader = new NdjsonReader();
+    var source = '\n{"name":"digigun"}\n\n42\n"hello"\nfalse\n';
+
+    switch (reader.read(source)) {
+      case Success(document):
+        Assertions.assertEquals("ndjson mixed record count", 4, document.records.length);
+        Assertions.assertEquals("ndjson mixed object field", "digigun", Reflect.field(document.getRecord(0), "name"));
+        Assertions.assertEquals("ndjson mixed integer", 42, document.getRecord(1));
+        Assertions.assertEquals("ndjson mixed string", "hello", document.getRecord(2));
+        Assertions.assertEquals("ndjson mixed bool", false, document.getRecord(3));
+      case Failure(error):
+        Assertions.fail('Expected NDJSON blank lines and mixed records to succeed: ${error.toString()}');
+    }
   }
 
   static function testInvalidNdjson():Void {

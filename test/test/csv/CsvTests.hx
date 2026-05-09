@@ -12,8 +12,10 @@ class CsvTests {
     testCsvParsing();
     testCsvEdgeFixture();
     testCsvRoundTrip();
+    testCsvAlternateDelimiterAndTrailingEmptyCell();
     testMutableCsvEditing();
     testInvalidCsv();
+    testInvalidCsvTrailingCharactersAfterQuote();
   }
 
   static function testCsvParsing():Void {
@@ -86,6 +88,28 @@ class CsvTests {
     Assertions.assertTrue("mutable csv remove row", document.removeRow(1));
   }
 
+  static function testCsvAlternateDelimiterAndTrailingEmptyCell():Void {
+    var reader = new CsvReader(";");
+    var writer = new CsvCodec(";");
+    var source = "name;value;notes;\ndigigun;42;ok;";
+
+    switch (reader.read(source)) {
+      case Success(document):
+        Assertions.assertEquals("csv alternate delimiter row count", 2, document.rows.length);
+        Assertions.assertEquals("csv alternate delimiter cell count", 4, document.rows[0].cells.length);
+        Assertions.assertEquals("csv alternate delimiter trailing empty cell", "", document.rows[1].cells[3].value);
+
+        switch (writer.write(document)) {
+          case Success(serialized):
+            Assertions.assertEquals("csv alternate delimiter round trip", source, serialized);
+          case Failure(error):
+            Assertions.fail('Expected alternate delimiter CSV write to succeed: ${error.toString()}');
+        }
+      case Failure(error):
+        Assertions.fail('Expected alternate delimiter CSV parse to succeed: ${error.toString()}');
+    }
+  }
+
   static function testInvalidCsv():Void {
     var reader = new CsvReader();
     switch (reader.read('"unterminated')) {
@@ -93,6 +117,16 @@ class CsvTests {
         Assertions.assertEquals("invalid csv code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected malformed CSV to fail.");
+    }
+  }
+
+  static function testInvalidCsvTrailingCharactersAfterQuote():Void {
+    var reader = new CsvReader();
+    switch (reader.read('"value"x')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid csv trailing characters after quote code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected trailing characters after closing CSV quote to fail.");
     }
   }
 }

@@ -11,6 +11,21 @@
 
 ## Current branch notes
 
+- `text-hardening/msgpack-ndjson-csv` is now active.
+- The first pass on this branch added:
+  - nested MessagePack structure coverage
+  - MessagePack unsupported integer-range coverage
+  - a real MessagePack float64 decode fix
+  - NDJSON blank-line and mixed primitive/object coverage
+  - CSV alternate-delimiter and trailing-empty-cell coverage
+  - a CSV parser fix for trailing characters after closing quotes
+- Remaining likely opportunities on this branch:
+  - MessagePack malformed nested payload rejection coverage
+  - NDJSON invalid-line isolation and line-number precision checks
+  - CSV whitespace/quote-boundary subset clarification and rejection coverage
+
+## Current branch notes
+
 - `text-hardening/toml-yaml-hcl` has an initial green pass.
 - The completed passes on this branch added:
   - nested TOML inline-table coverage

@@ -15,6 +15,10 @@
   added more YAML/HCL malformed-structure coverage.
 - The current pass aligned README subset wording with the enforced TOML rules
   and added final YAML indentation and HCL object-delimiter rejection coverage.
+- Follow-up work has now moved to branch `text-hardening/msgpack-ndjson-csv`.
+- The first pass on that branch added MessagePack nested/range coverage, fixed
+  MessagePack float64 decoding, added NDJSON mixed-record coverage, and
+  tightened CSV quoted-cell parsing.
 
 ## Files intentionally changed for the text milestone
 

@@ -185,7 +185,7 @@ class MessagePackReader implements FormatReader<Bytes, MessagePackDocument> {
     }
     var high = readRawInt32();
     var low = readRawInt32();
-    return Success(FPHelper.i64ToDouble(high, low));
+    return Success(FPHelper.i64ToDouble(low, high));
   }
 
   function readUInt32AsInt():FormatResult<MessagePackValue> {

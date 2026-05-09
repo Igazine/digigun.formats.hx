@@ -16,8 +16,10 @@ class MessagePackTests {
     testMessagePackParsing();
     testMessagePackEdgeFixture();
     testMessagePackRoundTrip();
+    testNestedMessagePackStructures();
     testMutableMessagePackEditing();
     testInvalidMessagePack();
+    testUnsupportedMessagePackIntegerRanges();
   }
 
   static function testMessagePackParsing():Void {
@@ -106,6 +108,45 @@ class MessagePackTests {
     Assertions.assertTrue("msgpack property removed", document.getProperty("count") == null);
   }
 
+  static function testNestedMessagePackStructures():Void {
+    var root = new MessagePackMap();
+    var nested = new MessagePackMap();
+    nested.setProperty("enabled", true);
+    nested.setProperty("count", -5);
+    nested.setProperty("ratio", 1.25);
+    nested.setProperty("nothing", MessagePackValues.nullValue());
+
+    var items = new MessagePackArray();
+    items.add("alpha");
+    items.add(nested);
+    items.add(Bytes.ofHex("00ff10"));
+
+    root.setProperty("items", items);
+    root.setProperty("meta", nested);
+    var codec = new MessagePackCodec();
+
+    var bytes = switch (codec.write(new MessagePackDocument(root))) {
+      case Success(value):
+        value;
+      case Failure(error):
+        Assertions.fail('Expected nested MessagePack write to succeed: ${error.toString()}');
+        Bytes.alloc(0);
+    };
+
+    switch (codec.read(bytes)) {
+      case Success(document):
+        var parsedItems = document.getProperty("items").value.asArray();
+        Assertions.assertEquals("msgpack nested array size", 3, parsedItems.items.length);
+        Assertions.assertEquals("msgpack nested map bool", true, parsedItems.get(1).asMap().getProperty("enabled").value.asBool());
+        Assertions.assertEquals("msgpack nested negative int", -5, parsedItems.get(1).asMap().getProperty("count").value.asInt());
+        Assertions.assertFloatEquals("msgpack nested float", 1.25, parsedItems.get(1).asMap().getProperty("ratio").value.asFloat());
+        Assertions.assertTrue("msgpack nested null", parsedItems.get(1).asMap().getProperty("nothing").value.isNull());
+        Assertions.assertEquals("msgpack nested bytes", "00ff10", parsedItems.get(2).asBytes().toHex().toLowerCase());
+      case Failure(error):
+        Assertions.fail('Expected nested MessagePack round trip to succeed: ${error.toString()}');
+    }
+  }
+
   static function testInvalidMessagePack():Void {
     var reader = new MessagePackReader();
     var input = Bytes.ofHex("a361");
@@ -115,6 +156,24 @@ class MessagePackTests {
         Assertions.assertEquals("invalid msgpack code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected malformed MessagePack to fail.");
+    }
+  }
+
+  static function testUnsupportedMessagePackIntegerRanges():Void {
+    var reader = new MessagePackReader();
+
+    switch (reader.read(Bytes.ofHex("ceffffffff"))) {
+      case Failure(error):
+        Assertions.assertEquals("unsupported msgpack uint32 range code", FormatErrorCode.UnsupportedFeature, error.code);
+      case Success(_):
+        Assertions.fail("Expected out-of-range MessagePack uint32 to fail.");
+    }
+
+    switch (reader.read(Bytes.ofHex("cf0000000000000001"))) {
+      case Failure(error):
+        Assertions.assertEquals("unsupported msgpack uint64 code", FormatErrorCode.UnsupportedFeature, error.code);
+      case Success(_):
+        Assertions.fail("Expected MessagePack uint64 to fail.");
     }
   }
 }
