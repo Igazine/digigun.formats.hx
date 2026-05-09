@@ -18,6 +18,7 @@ class HclTests {
     testHclNestedObjectAndTrimmedHeredoc();
     testMutableHclEditing();
     testInvalidHcl();
+    testInvalidHclNestedObjectStructure();
   }
 
   static function testHclParsing():Void {
@@ -146,6 +147,16 @@ class HclTests {
         Assertions.assertEquals("invalid hcl code", FormatErrorCode.UnsupportedFeature, error.code);
       case Success(_):
         Assertions.fail("Expected unsupported HCL expression to fail.");
+    }
+  }
+
+  static function testInvalidHclNestedObjectStructure():Void {
+    var reader = new HclReader();
+    switch (reader.read('locals { config = { owner = "digigun", nested = { stage = "stable" ] } } }')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid hcl nested object code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected malformed nested HCL object to fail.");
     }
   }
 }

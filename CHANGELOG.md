@@ -6,8 +6,12 @@
   combinations inside the supported inline-table subset
 - Added YAML hardening coverage for nested flow collections and fixed scalar
   writer quoting for strings that would otherwise round-trip as non-strings
+- Added YAML rejection coverage for trailing root content and malformed flow
+  collection syntax, and now reject malformed flow-looking scalars explicitly
 - Added HCL hardening coverage for nested objects, nested arrays, and trimmed
   heredoc parsing
+- Added rejection coverage for malformed TOML inline tables and malformed
+  nested HCL object structure
 
 ## 0.2.0
 

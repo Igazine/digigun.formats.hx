@@ -9,6 +9,8 @@
 - Follow-up work began on branch `text-hardening/toml-yaml-hcl`.
 - The first hardening pass added deeper TOML/YAML/HCL edge coverage and fixed a
   YAML string round-trip ambiguity in the writer.
+- The second hardening pass added rejection coverage and a YAML parser fix for
+  trailing root content and malformed flow-looking scalars.
 
 ## Files intentionally changed for the text milestone
 

@@ -19,6 +19,7 @@ class TomlTests {
     testTomlSampleFixture();
     testTomlRoundTrip();
     testNestedInlineTables();
+    testInvalidTomlInlineTableStructure();
     testInvalidToml();
     testTomlValueConversions();
     testImplicitValueConstruction();
@@ -122,6 +123,16 @@ class TomlTests {
         Assertions.assertEquals("invalid toml code", FormatErrorCode.UnsupportedFeature, error.code);
       case Success(_):
         Assertions.fail("Expected unsupported TOML value to fail.");
+    }
+  }
+
+  static function testInvalidTomlInlineTableStructure():Void {
+    var reader = new TomlReader();
+    switch (reader.read('metadata = { owner = "digigun", }')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid toml inline table code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected malformed TOML inline table to fail.");
     }
   }
 

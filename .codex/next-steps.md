@@ -12,16 +12,20 @@
 ## Current branch notes
 
 - `text-hardening/toml-yaml-hcl` has an initial green pass.
-- That pass added:
+- The completed passes on this branch added:
   - nested TOML inline-table coverage
   - nested YAML flow-collection coverage
   - YAML writer quoting for strings that resemble booleans, nulls, numbers, or
     flow collections
   - HCL nested object/array and trimmed heredoc coverage
+  - TOML malformed inline-table rejection coverage
+  - YAML trailing-root-content rejection coverage
+  - YAML malformed flow-syntax rejection and parser tightening
+  - HCL malformed nested-object rejection coverage
 - Remaining likely opportunities in this branch:
-  - TOML invalid inline-table and delimiter edge rejection
-  - YAML indentation/mixed-structure rejection coverage
-  - HCL malformed nested-structure rejection coverage
+  - TOML quoted-key and table-name subset clarification
+  - YAML additional indentation and mixed flow/block rejection coverage
+  - HCL malformed array/object delimiter edge rejection
 
 ## Known deferred work
 

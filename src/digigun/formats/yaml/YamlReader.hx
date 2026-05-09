@@ -40,7 +40,12 @@ class YamlReader implements FormatReader<String, YamlDocument> {
       case Failure(error):
         Failure(error);
       case Success(result):
-        Success(new YamlDocument(result.value));
+        var trailingIndex = nextSignificantLine(lines, result.nextIndex);
+        if (trailingIndex < lines.length) {
+          Failure(error("Unexpected trailing tokens in YAML document.", trailingIndex + 1, lineIndent(lines[trailingIndex]) + 1));
+        } else {
+          Success(new YamlDocument(result.value));
+        }
     };
   }
 
@@ -183,6 +188,10 @@ class YamlReader implements FormatReader<String, YamlDocument> {
 
     if (isFlowObject(rawValue)) {
       return parseFlowObject(rawValue, line);
+    }
+
+    if (looksLikeFlowCollection(rawValue)) {
+      return Failure(error("Unterminated or malformed YAML flow collection.", line, column));
     }
 
     if (TextFormatTools.isQuoted(rawValue)) {
@@ -419,6 +428,10 @@ class YamlReader implements FormatReader<String, YamlDocument> {
 
   inline function isFlowObject(value:String):Bool {
     return value.length >= 2 && value.charAt(0) == "{" && value.charAt(value.length - 1) == "}";
+  }
+
+  inline function looksLikeFlowCollection(value:String):Bool {
+    return value != "" && (value.charAt(0) == "[" || value.charAt(0) == "{" || value.charAt(0) == "]" || value.charAt(0) == "}");
   }
 
   inline function error(message:String, line:Int, column:Int):FormatError {

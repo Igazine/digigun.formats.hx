@@ -19,6 +19,8 @@ class YamlTests {
     testYamlAmbiguousStringRoundTrip();
     testMutableYamlEditing();
     testInvalidYaml();
+    testInvalidYamlTrailingRootContent();
+    testInvalidYamlUnterminatedFlowCollection();
   }
 
   static function testYamlParsing():Void {
@@ -177,6 +179,26 @@ class YamlTests {
         Assertions.assertEquals("invalid yaml code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected malformed YAML to fail.");
+    }
+  }
+
+  static function testInvalidYamlTrailingRootContent():Void {
+    var reader = new YamlReader();
+    switch (reader.read("- alpha\n- beta\nname: digigun")) {
+      case Failure(error):
+        Assertions.assertEquals("invalid yaml trailing root content code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected trailing root YAML content to fail.");
+    }
+  }
+
+  static function testInvalidYamlUnterminatedFlowCollection():Void {
+    var reader = new YamlReader();
+    switch (reader.read('meta: [alpha, { owner: digigun }')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid yaml unterminated flow code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected unterminated YAML flow collection to fail.");
     }
   }
 }
