@@ -2,23 +2,32 @@
 
 ## Highest-priority follow-ups after `v0.2.0`
 
-- Reassess the untracked image/texture work and decide whether it belongs in a
-  dedicated branch, a follow-up milestone, or a narrower extraction.
-- Expand text-format edge coverage where current subsets are still intentionally
-  limited.
-- Add stronger multi-target verification if cross-target support needs to be
-  enforced more strictly than interpreter-only CI.
+- Continue text hardening in this order:
+  1. `text-hardening/toml-yaml-hcl`
+  2. `text-hardening/msgpack-ndjson-csv`
+  3. `text-hardening/ini-env-properties`
+- Reassess the untracked image/texture work only after the text-format
+  hardening sequence reaches a good stopping point.
 
-## Questions for the next joint investigation
+## Current branch notes
 
-- Which text-format subset gaps matter most to intended users?
-- Should the next milestone deepen text correctness, broaden examples, or move
-  into image/texture format work?
-- Does the repo need a clearer release discipline for staging unrelated work in
-  parallel?
+- `text-hardening/toml-yaml-hcl` has an initial green pass.
+- That pass added:
+  - nested TOML inline-table coverage
+  - nested YAML flow-collection coverage
+  - YAML writer quoting for strings that resemble booleans, nulls, numbers, or
+    flow collections
+  - HCL nested object/array and trimmed heredoc coverage
+- Remaining likely opportunities in this branch:
+  - TOML invalid inline-table and delimiter edge rejection
+  - YAML indentation/mixed-structure rejection coverage
+  - HCL malformed nested-structure rejection coverage
 
 ## Known deferred work
 
 - Image and texture codec integration
 - Image-related examples and documentation
-- Any automated compatibility checks beyond the current build/test workflow
+- JSON5 as a low-priority future consideration only if a concrete use case
+  emerges
+- Archive/compression-related formats only after the separate compression
+  project is ready for reuse here

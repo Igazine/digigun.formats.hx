@@ -15,6 +15,7 @@ class HclTests {
     testHclEdgeFixture();
     testHclSampleFixture();
     testHclRoundTrip();
+    testHclNestedObjectAndTrimmedHeredoc();
     testMutableHclEditing();
     testInvalidHcl();
   }
@@ -99,6 +100,24 @@ class HclTests {
         Assertions.assertEquals("hcl sample object field", "formats", sourceBlock.body.getAttribute("tags").value.asObject().getField("Project").value.asString());
       case Failure(error):
         Assertions.fail('Expected HCL sample fixture to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testHclNestedObjectAndTrimmedHeredoc():Void {
+    var reader = new HclReader();
+    var source = 'locals {\n  config = {\n    owner = "digigun"\n    nested = {\n      ports = [80, 443]\n      labels = {\n        stage = "stable"\n      }\n    }\n  }\n  description = <<-EOF\n    line one\n    line two\n  EOF\n}\n';
+
+    switch (reader.read(source)) {
+      case Success(document):
+        var localsBlock = document.getOrCreateBlock("locals");
+        var config = localsBlock.body.getAttribute("config").value.asObject();
+        Assertions.assertEquals("hcl nested object owner", "digigun", config.getField("owner").value.asString());
+        Assertions.assertEquals("hcl nested object array value", 443, config.getField("nested").value.asObject().getField("ports").value.asArray().get(1).asInt());
+        Assertions.assertEquals("hcl nested object field", "stable", config.getField("nested").value.asObject().getField("labels").value.asObject().getField("stage").value.asString());
+        Assertions.assertTrue("hcl trimmed heredoc line one", localsBlock.body.getAttribute("description").value.asString().indexOf("line one") >= 0);
+        Assertions.assertTrue("hcl trimmed heredoc line two", localsBlock.body.getAttribute("description").value.asString().indexOf("line two") >= 0);
+      case Failure(error):
+        Assertions.fail('Expected nested HCL object and trimmed heredoc to succeed: ${error.toString()}');
     }
   }
 

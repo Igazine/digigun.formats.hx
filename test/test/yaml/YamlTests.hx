@@ -15,6 +15,8 @@ class YamlTests {
     testYamlEdgeFixture();
     testYamlSampleFixture();
     testYamlRoundTrip();
+    testYamlNestedFlowCollections();
+    testYamlAmbiguousStringRoundTrip();
     testMutableYamlEditing();
     testInvalidYaml();
   }
@@ -101,9 +103,55 @@ class YamlTests {
     }
   }
 
+  static function testYamlNestedFlowCollections():Void {
+    var reader = new YamlReader();
+    var source = 'meta: { owner: digigun, flags: [true, "false", { stage: stable }], nested: { values: [1, 2, 3] } }';
+
+    switch (reader.read(source)) {
+      case Success(document):
+        var meta = document.getProperty("meta").value.asObject();
+        var flags = meta.getProperty("flags").value.asArray();
+        Assertions.assertEquals("yaml nested flow flags size", 3, flags.items.length);
+        Assertions.assertEquals("yaml nested flow bool item", true, flags.get(0).asBool());
+        Assertions.assertEquals("yaml nested flow quoted string item", "false", flags.get(1).asString());
+        Assertions.assertEquals("yaml nested flow object item", "stable", flags.get(2).asObject().getProperty("stage").value.asString());
+        Assertions.assertEquals("yaml nested flow nested array value", 3, meta.getProperty("nested").value.asObject().getProperty("values").value.asArray().get(2).asInt());
+      case Failure(error):
+        Assertions.fail('Expected nested YAML flow collections to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testYamlAmbiguousStringRoundTrip():Void {
+    var root = new YamlObject();
+    root.setProperty("boolean_text", "true");
+    root.setProperty("integer_text", "123");
+    root.setProperty("null_text", "~");
+    root.setProperty("flow_array_text", "[alpha]");
+    root.setProperty("flow_object_text", "{ owner: digigun }");
+
+    var codec = new YamlCodec();
+    var serialized = switch (codec.write(new YamlDocument(root))) {
+      case Success(value):
+        value;
+      case Failure(error):
+        Assertions.fail('Expected YAML ambiguity write to succeed: ${error.toString()}');
+        "";
+    };
+
+    switch (codec.read(serialized)) {
+      case Success(document):
+        Assertions.assertEquals("yaml ambiguous bool string", "true", document.getProperty("boolean_text").value.asString());
+        Assertions.assertEquals("yaml ambiguous int string", "123", document.getProperty("integer_text").value.asString());
+        Assertions.assertEquals("yaml ambiguous null string", "~", document.getProperty("null_text").value.asString());
+        Assertions.assertEquals("yaml ambiguous flow array string", "[alpha]", document.getProperty("flow_array_text").value.asString());
+        Assertions.assertEquals("yaml ambiguous flow object string", "{ owner: digigun }", document.getProperty("flow_object_text").value.asString());
+      case Failure(error):
+        Assertions.fail('Expected YAML ambiguity round trip to succeed: ${error.toString()}');
+    }
+  }
+
   static function testMutableYamlEditing():Void {
     var document = new YamlDocument();
-    var root = document.getOrCreateRootObject();
     document.setProperty("name", "digigun");
     document.setProperty("enabled", true);
 

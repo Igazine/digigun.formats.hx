@@ -93,7 +93,25 @@ class YamlWriter implements FormatWriter<YamlDocument, String> {
     }
 
     var trimmed = value.trim();
-    if (trimmed != value || value == "" || trimmed == "-" || trimmed == "null" || trimmed == "true" || trimmed == "false") {
+    if (trimmed != value || value == "" || trimmed == "-" || trimmed == "null" || trimmed == "true" || trimmed == "false" || trimmed == "~") {
+      return true;
+    }
+
+    var lower = trimmed.toLowerCase();
+    if (lower == "null" || lower == "true" || lower == "false") {
+      return true;
+    }
+
+    if ((trimmed.length >= 2 && trimmed.charAt(0) == "[" && trimmed.charAt(trimmed.length - 1) == "]")
+      || (trimmed.length >= 2 && trimmed.charAt(0) == "{" && trimmed.charAt(trimmed.length - 1) == "}")) {
+      return true;
+    }
+
+    if (~/^[+-]?\d+$/.match(trimmed)) {
+      return true;
+    }
+
+    if (~/^[+-]?(?:\d+\.\d+|\d+\.|\.\d+)(?:[eE][+-]?\d+)?$/.match(trimmed) || ~/^[+-]?\d+[eE][+-]?\d+$/.match(trimmed)) {
       return true;
     }
 

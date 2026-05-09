@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Added TOML hardening coverage for nested inline tables and nested array/object
+  combinations inside the supported inline-table subset
+- Added YAML hardening coverage for nested flow collections and fixed scalar
+  writer quoting for strings that would otherwise round-trip as non-strings
+- Added HCL hardening coverage for nested objects, nested arrays, and trimmed
+  heredoc parsing
+
 ## 0.2.0
 
 - Stabilized the text-format milestone covering INI, TOML, CSV, `.properties`,

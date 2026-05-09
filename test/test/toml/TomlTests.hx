@@ -18,6 +18,7 @@ class TomlTests {
     testTomlEdgeFixture();
     testTomlSampleFixture();
     testTomlRoundTrip();
+    testNestedInlineTables();
     testInvalidToml();
     testTomlValueConversions();
     testImplicitValueConstruction();
@@ -93,6 +94,24 @@ class TomlTests {
         Assertions.assertEquals("toml sample ci jobs size", 2, document.getTable("ci").getProperty("jobs").value.asArray().length);
       case Failure(error):
         Assertions.fail('Expected TOML sample fixture to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testNestedInlineTables():Void {
+    var reader = new TomlReader();
+    var source = 'metadata = { owner = "digigun", nested = { team = "engine", active = true }, matrix = [[1, 2], [3, 4]], empty = {} }';
+
+    switch (reader.read(source)) {
+      case Success(document):
+        var metadata = document.getGlobalProperty("metadata").value.asObject();
+        Assertions.assertEquals("toml nested inline table owner", "digigun", metadata.getField("owner").value.asString());
+        Assertions.assertEquals("toml nested inline table field", "engine", metadata.getField("nested").value.asObject().getField("team").value.asString());
+        Assertions.assertEquals("toml nested inline bool", true, metadata.getField("nested").value.asObject().getField("active").value.asBool());
+        Assertions.assertEquals("toml nested inline matrix outer size", 2, metadata.getField("matrix").value.asArray().length);
+        Assertions.assertEquals("toml nested inline matrix inner value", 4, metadata.getField("matrix").value.asArray()[1].asArray()[1].asInt());
+        Assertions.assertEquals("toml nested inline empty object field count", 0, metadata.getField("empty").value.asObject().fields.length);
+      case Failure(error):
+        Assertions.fail('Expected nested TOML inline tables to succeed: ${error.toString()}');
     }
   }
 
