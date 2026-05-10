@@ -14,6 +14,7 @@ class IniTests {
   public static function run():Void {
     testIniParsing();
     testIniRoundTrip();
+    testIniAmbiguousStringRoundTrip();
     testInvalidIni();
     testValueConversions();
     testImplicitValueConstruction();
@@ -67,6 +68,33 @@ class IniTests {
         Assertions.assertEquals("invalid ini code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected malformed ini to fail.");
+    }
+  }
+
+  static function testIniAmbiguousStringRoundTrip():Void {
+    var document = new IniDocument();
+    document.setGlobalProperty("bool_text", "true");
+    document.setGlobalProperty("int_text", "123");
+    document.setGlobalProperty("float_text", "1.5");
+    document.setGlobalProperty("spaced_text", "hello world");
+
+    var codec = new IniCodec();
+    var serialized = switch (codec.write(document)) {
+      case Success(value):
+        value;
+      case Failure(error):
+        Assertions.fail('Expected INI ambiguity write to succeed: ${error.toString()}');
+        "";
+    };
+
+    switch (codec.read(serialized)) {
+      case Success(parsed):
+        Assertions.assertEquals("ini ambiguous bool string", "true", parsed.getGlobalProperty("bool_text").value.asString());
+        Assertions.assertEquals("ini ambiguous int string", "123", parsed.getGlobalProperty("int_text").value.asString());
+        Assertions.assertEquals("ini ambiguous float string", "1.5", parsed.getGlobalProperty("float_text").value.asString());
+        Assertions.assertEquals("ini ambiguous spaced string", "hello world", parsed.getGlobalProperty("spaced_text").value.asString());
+      case Failure(error):
+        Assertions.fail('Expected INI ambiguity round trip to succeed: ${error.toString()}');
     }
   }
 

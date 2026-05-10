@@ -12,6 +12,7 @@ class EnvTests {
     testEnvParsing();
     testEnvSampleFixture();
     testEnvRoundTrip();
+    testEnvQuotedAndEmptyValues();
     testMutableEnvEditing();
     testInvalidEnv();
   }
@@ -79,6 +80,20 @@ class EnvTests {
     Assertions.assertEquals("mutable env updated exported", false, document.getProperty("APP_NAME").exported);
     Assertions.assertTrue("mutable env remove", document.removeProperty("APP_NAME"));
     Assertions.assertTrue("mutable env removed", !document.hasProperty("APP_NAME"));
+  }
+
+  static function testEnvQuotedAndEmptyValues():Void {
+    var reader = new EnvReader();
+    var source = 'EMPTY=""\nMESSAGE="hello # still text"\nPLAIN=value#literal\n';
+
+    switch (reader.read(source)) {
+      case Success(document):
+        Assertions.assertEquals("env empty quoted value", "", document.getProperty("EMPTY").value);
+        Assertions.assertEquals("env quoted hash value", "hello # still text", document.getProperty("MESSAGE").value);
+        Assertions.assertEquals("env plain hash literal", "value#literal", document.getProperty("PLAIN").value);
+      case Failure(error):
+        Assertions.fail('Expected env quoted and empty values to succeed: ${error.toString()}');
+    }
   }
 
   static function testInvalidEnv():Void {

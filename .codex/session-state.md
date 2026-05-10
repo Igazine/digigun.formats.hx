@@ -25,6 +25,9 @@
 - The current pass aligned the MessagePack/NDJSON/CSV docs with actual parser
   behavior and added explicit coverage for MessagePack maps with non-string
   keys.
+- Follow-up work has now moved to branch `text-hardening/ini-env-properties`.
+- The first pass on that branch fixed INI ambiguous-string serialization,
+  fixed `.properties` escaped-delimiter parsing, and expanded `.env` coverage.
 
 ## Current repo state
 

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Began `text-hardening/ini-env-properties`
+- Fixed INI writer quoting so string values that look like booleans or numbers
+  round-trip as strings
+- Fixed `.properties` delimiter detection so escaped `=` and `:` remain part of
+  the key or value
+- Added `.env` coverage for quoted empty values and literal `#` handling
+
 - Began `text-hardening/msgpack-ndjson-csv`
 - Added nested MessagePack structure coverage and unsupported integer-range
   coverage

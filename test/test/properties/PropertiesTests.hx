@@ -11,6 +11,7 @@ class PropertiesTests {
   public static function run():Void {
     testPropertiesParsing();
     testPropertiesRoundTrip();
+    testPropertiesEscapedDelimiters();
     testMutablePropertiesEditing();
     testInvalidProperties();
   }
@@ -62,6 +63,19 @@ class PropertiesTests {
     Assertions.assertEquals("mutable properties updated value", "igazine", document.getProperty("name").value);
     Assertions.assertTrue("mutable properties remove", document.removeProperty("name"));
     Assertions.assertTrue("mutable properties removed", !document.hasProperty("name"));
+  }
+
+  static function testPropertiesEscapedDelimiters():Void {
+    var reader = new PropertiesReader();
+    var source = 'db\\=name=digigun\\:formats\npath=C\\:\\\\tools\n';
+
+    switch (reader.read(source)) {
+      case Success(document):
+        Assertions.assertEquals("properties escaped delimiter key", "digigun:formats", document.getProperty("db=name").value);
+        Assertions.assertEquals("properties escaped delimiter value", "C:\\tools", document.getProperty("path").value);
+      case Failure(error):
+        Assertions.fail('Expected properties escaped delimiters to succeed: ${error.toString()}');
+    }
   }
 
   static function testInvalidProperties():Void {

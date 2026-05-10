@@ -11,6 +11,19 @@
 
 ## Current branch notes
 
+- `text-hardening/ini-env-properties` is now active.
+- The first pass on this branch added:
+  - INI ambiguous-string round-trip coverage
+  - an INI writer fix for numeric/bool-looking strings
+  - `.env` coverage for quoted empty values and literal `#`
+  - `.properties` escaped-delimiter coverage
+  - a `.properties` parser fix for escaped `=` and `:`
+- Remaining likely opportunities on this branch:
+  - INI rejection coverage around malformed sections and duplicate/ordering
+    behavior clarity
+  - `.env` contract clarification around inline comments versus literal `#`
+  - `.properties` rejection coverage and README subset clarification
+
 - `text-hardening/msgpack-ndjson-csv` is now active.
 - The first pass on this branch added:
   - nested MessagePack structure coverage

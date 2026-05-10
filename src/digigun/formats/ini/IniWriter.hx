@@ -60,7 +60,7 @@ class IniWriter implements FormatWriter<IniDocument, String> {
       return "\"\"";
     }
 
-    if (SAFE_STRING_PATTERN.match(value)) {
+    if (SAFE_STRING_PATTERN.match(value) && !looksAmbiguous(value)) {
       return value;
     }
 
@@ -68,4 +68,16 @@ class IniWriter implements FormatWriter<IniDocument, String> {
   }
 
   static final SAFE_STRING_PATTERN = ~/^[A-Za-z0-9_.\-\/]+$/;
+  static final INTEGER_PATTERN = ~/^[+-]?\d+$/;
+  static final FLOAT_PATTERN = ~/^[+-]?(?:\d+\.\d+|\d+\.|\.\d+)(?:[eE][+-]?\d+)?$/;
+  static final FLOAT_EXP_PATTERN = ~/^[+-]?\d+[eE][+-]?\d+$/;
+
+  function looksAmbiguous(value:String):Bool {
+    var lower = value.toLowerCase();
+    return lower == "true"
+      || lower == "false"
+      || INTEGER_PATTERN.match(value)
+      || FLOAT_PATTERN.match(value)
+      || FLOAT_EXP_PATTERN.match(value);
+  }
 }

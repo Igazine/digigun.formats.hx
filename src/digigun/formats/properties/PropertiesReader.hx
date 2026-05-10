@@ -51,8 +51,17 @@ class PropertiesReader implements FormatReader<String, PropertiesDocument> {
   }
 
   function findDelimiter(value:String):Int {
+    var escaping = false;
     for (index in 0...value.length) {
       var char = value.charAt(index);
+      if (escaping) {
+        escaping = false;
+        continue;
+      }
+      if (char == "\\") {
+        escaping = true;
+        continue;
+      }
       if (char == "=" || char == ":") {
         return index;
       }
@@ -68,4 +77,3 @@ class PropertiesReader implements FormatReader<String, PropertiesDocument> {
     return new FormatError(FormatErrorCode.InvalidStructure, message, new FormatLocation(line, column), PropertiesFormat.id);
   }
 }
-
