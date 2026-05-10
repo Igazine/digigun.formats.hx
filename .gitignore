@@ -3,4 +3,4 @@ bin/
 dist/
 dump/
 node_modules/
-
+.codex/
