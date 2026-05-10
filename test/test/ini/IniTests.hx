@@ -19,6 +19,7 @@ class IniTests {
     testValueConversions();
     testImplicitValueConstruction();
     testMutableIniEditing();
+    testInvalidIniSectionHeader();
   }
 
   static function testIniParsing():Void {
@@ -125,5 +126,15 @@ class IniTests {
     Assertions.assertTrue("mutable ini remove property", section.removeProperty("enabled"));
     Assertions.assertTrue("mutable ini remove section", document.removeSection("app"));
     Assertions.assertTrue("mutable ini section removed", !document.hasSection("app"));
+  }
+
+  static function testInvalidIniSectionHeader():Void {
+    var reader = new IniReader();
+    switch (reader.read("[app")) {
+      case Failure(error):
+        Assertions.assertEquals("invalid ini section header code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected malformed INI section header to fail.");
+    }
   }
 }

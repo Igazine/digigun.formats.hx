@@ -25,7 +25,12 @@ class PropertiesWriter implements FormatWriter<PropertiesDocument, String> {
   }
 
   function escape(value:String):String {
-    return TextFormatTools.escapeDoubleQuoted(value);
+    var escaped = StringTools.replace(value, "\\", "\\\\");
+    escaped = StringTools.replace(escaped, "=", "\\=");
+    escaped = StringTools.replace(escaped, ":", "\\:");
+    escaped = StringTools.replace(escaped, "\n", "\\n");
+    escaped = StringTools.replace(escaped, "\r", "\\r");
+    escaped = StringTools.replace(escaped, "\t", "\\t");
+    return escaped;
   }
 }
-

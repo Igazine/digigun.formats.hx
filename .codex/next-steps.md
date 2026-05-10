@@ -19,10 +19,10 @@
   - `.properties` escaped-delimiter coverage
   - a `.properties` parser fix for escaped `=` and `:`
 - Remaining likely opportunities on this branch:
-  - INI rejection coverage around malformed sections and duplicate/ordering
-    behavior clarity
+  - INI duplicate/ordering behavior clarification
   - `.env` contract clarification around inline comments versus literal `#`
-  - `.properties` rejection coverage and README subset clarification
+  - `.properties` README subset clarification and any additional malformed-case
+    coverage only if a concrete parser gap appears
 
 - `text-hardening/msgpack-ndjson-csv` is now active.
 - The first pass on this branch added:

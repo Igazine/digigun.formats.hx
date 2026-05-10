@@ -7,7 +7,10 @@
   round-trip as strings
 - Fixed `.properties` delimiter detection so escaped `=` and `:` remain part of
   the key or value
+- Fixed `.properties` writing so literal `=` and `:` round-trip correctly
 - Added `.env` coverage for quoted empty values and literal `#` handling
+- Added malformed INI section-header and malformed exported `.env` entry
+  coverage
 
 - Began `text-hardening/msgpack-ndjson-csv`
 - Added nested MessagePack structure coverage and unsupported integer-range

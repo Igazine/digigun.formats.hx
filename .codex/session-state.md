@@ -28,6 +28,8 @@
 - Follow-up work has now moved to branch `text-hardening/ini-env-properties`.
 - The first pass on that branch fixed INI ambiguous-string serialization,
   fixed `.properties` escaped-delimiter parsing, and expanded `.env` coverage.
+- The second pass on that branch fixed `.properties` delimiter escaping during
+  writing and added malformed INI and `.env` rejection coverage.
 
 ## Current repo state
 

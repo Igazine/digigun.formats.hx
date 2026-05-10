@@ -15,6 +15,7 @@ class EnvTests {
     testEnvQuotedAndEmptyValues();
     testMutableEnvEditing();
     testInvalidEnv();
+    testInvalidEnvExportWithoutAssignment();
   }
 
   static function testEnvParsing():Void {
@@ -103,6 +104,16 @@ class EnvTests {
         Assertions.assertEquals("invalid env code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected malformed env to fail.");
+    }
+  }
+
+  static function testInvalidEnvExportWithoutAssignment():Void {
+    var reader = new EnvReader();
+    switch (reader.read("export APP_NAME")) {
+      case Failure(error):
+        Assertions.assertEquals("invalid env export without assignment code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected malformed exported env entry to fail.");
     }
   }
 }

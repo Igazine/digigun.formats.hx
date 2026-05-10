@@ -12,6 +12,7 @@ class PropertiesTests {
     testPropertiesParsing();
     testPropertiesRoundTrip();
     testPropertiesEscapedDelimiters();
+    testPropertiesDelimiterRoundTrip();
     testMutablePropertiesEditing();
     testInvalidProperties();
   }
@@ -75,6 +76,29 @@ class PropertiesTests {
         Assertions.assertEquals("properties escaped delimiter value", "C:\\tools", document.getProperty("path").value);
       case Failure(error):
         Assertions.fail('Expected properties escaped delimiters to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testPropertiesDelimiterRoundTrip():Void {
+    var document = new PropertiesDocument();
+    document.setProperty("db=name", "digigun:formats");
+    document.setProperty("path", "C:\\tools");
+    var codec = new PropertiesCodec();
+
+    var serialized = switch (codec.write(document)) {
+      case Success(value):
+        value;
+      case Failure(error):
+        Assertions.fail('Expected properties delimiter write to succeed: ${error.toString()}');
+        "";
+    };
+
+    switch (codec.read(serialized)) {
+      case Success(parsed):
+        Assertions.assertEquals("properties delimiter round trip value", "digigun:formats", parsed.getProperty("db=name").value);
+        Assertions.assertEquals("properties delimiter round trip path", "C:\\tools", parsed.getProperty("path").value);
+      case Failure(error):
+        Assertions.fail('Expected properties delimiter round trip parse to succeed: ${error.toString()}');
     }
   }
 
