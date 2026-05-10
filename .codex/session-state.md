@@ -30,6 +30,8 @@
   fixed `.properties` escaped-delimiter parsing, and expanded `.env` coverage.
 - The second pass on that branch fixed `.properties` delimiter escaping during
   writing and added malformed INI and `.env` rejection coverage.
+- The current pass aligned the README with actual INI, `.env`, and
+  `.properties` behavior and likely completes this branch for now.
 
 ## Current repo state
 

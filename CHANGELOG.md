@@ -11,6 +11,7 @@
 - Added `.env` coverage for quoted empty values and literal `#` handling
 - Added malformed INI section-header and malformed exported `.env` entry
   coverage
+- Clarified INI, `.env`, and `.properties` subset behavior in the README
 
 - Began `text-hardening/msgpack-ndjson-csv`
 - Added nested MessagePack structure coverage and unsupported integer-range

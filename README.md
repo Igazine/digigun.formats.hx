@@ -109,7 +109,8 @@ The built-in INI codec supports:
 - deterministic serialization of the typed document model
 
 The INI implementation intentionally targets a well-defined subset rather than
-every variant in the wild.
+every variant in the wild. Writer output uses quoting when a string would
+otherwise round-trip back as a boolean or numeric scalar.
 
 ## TOML support
 
@@ -149,6 +150,10 @@ The built-in `.properties` codec supports:
 - mutable property editing
 - deterministic serialization
 
+This implementation treats escaped `=` and `:` as literal key/value content and
+escapes them again during writing so delimiter-bearing keys and values
+round-trip correctly.
+
 ## `.env` support
 
 The built-in `.env` codec supports:
@@ -158,6 +163,10 @@ The built-in `.env` codec supports:
 - quoted and unquoted values
 - mutable variable editing
 - deterministic serialization
+
+This implementation currently treats `#` as a comment only when it starts a
+line. Inside unquoted values it is preserved literally, and the writer emits one
+entry per line without a trailing newline.
 
 ## YAML support
 
