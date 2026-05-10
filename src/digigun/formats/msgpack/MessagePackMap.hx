@@ -28,6 +28,9 @@ class MessagePackMap {
 
   /**
    * Returns the first entry whose key is the matching string.
+   *
+   * Generic MessagePack maps may contain non-string keys; this helper only
+   * matches entries backed by `VString`.
    */
   public function getProperty(key:String):Null<MessagePackEntry> {
     return StructuredDataTools.findByStringKey(entries, key, entryKey);
@@ -35,6 +38,9 @@ class MessagePackMap {
 
   /**
    * Returns whether a string-keyed property exists.
+   *
+   * Generic MessagePack maps may contain non-string keys; this helper only
+   * checks entries backed by `VString`.
    */
   public function hasProperty(key:String):Bool {
     return StructuredDataTools.hasByStringKey(entries, key, entryKey);

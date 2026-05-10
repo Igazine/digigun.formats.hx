@@ -17,6 +17,7 @@ class MessagePackTests {
     testMessagePackEdgeFixture();
     testMessagePackRoundTrip();
     testNestedMessagePackStructures();
+    testMessagePackNonStringMapKeys();
     testMutableMessagePackEditing();
     testInvalidMessagePack();
     testUnsupportedMessagePackIntegerRanges();
@@ -145,6 +146,21 @@ class MessagePackTests {
         Assertions.assertEquals("msgpack nested bytes", "00ff10", parsedItems.get(2).asBytes().toHex().toLowerCase());
       case Failure(error):
         Assertions.fail('Expected nested MessagePack round trip to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testMessagePackNonStringMapKeys():Void {
+    var reader = new MessagePackReader();
+    switch (reader.read(Bytes.ofHex("8201a36f6e65a374776f02"))) {
+      case Success(document):
+        var root = document.getRootMap();
+        Assertions.assertEquals("msgpack non-string key entry count", 2, root.entries.length);
+        Assertions.assertEquals("msgpack non-string key int", 1, root.entries[0].key.asInt());
+        Assertions.assertEquals("msgpack non-string key value", "one", root.entries[0].value.asString());
+        Assertions.assertEquals("msgpack string key convenience lookup", 2, root.getProperty("two").value.asInt());
+        Assertions.assertTrue("msgpack non-string key convenience miss", root.getProperty("1") == null);
+      case Failure(error):
+        Assertions.fail('Expected MessagePack map with non-string keys to succeed: ${error.toString()}');
     }
   }
 

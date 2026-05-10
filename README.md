@@ -136,6 +136,10 @@ The built-in CSV codec supports:
 - mutable row and cell editing
 - deterministic serialization
 
+The CSV implementation intentionally uses a strict quoting subset: quotes must
+start at the beginning of a cell, and no extra characters are accepted after a
+closing quote before the delimiter or line ending.
+
 ## `.properties` support
 
 The built-in `.properties` codec supports:
@@ -181,19 +185,23 @@ The built-in MessagePack codec supports a practical binary subset:
 - deterministic serialization for supported types
 
 The MessagePack implementation intentionally does not yet cover extension types
-or 64-bit integers outside the Haxe `Int` range.
+or 64-bit integers outside the Haxe `Int` range. Generic binary maps may use
+non-string keys, but the convenience `getProperty`/`setProperty` helpers are
+specifically for string-keyed entries.
 
 ## NDJSON support
 
 The built-in NDJSON codec supports:
 
 - one JSON value per line
+- blank lines are ignored during parsing
 - mutable record editing
 - serialization through `haxe.Json.stringify`
 - parsing through `haxe.Json.parse`
 
 This implementation intentionally delegates JSON semantics to the standard
-library instead of reimplementing JSON parsing or writing.
+library instead of reimplementing JSON parsing or writing. The writer emits one
+record per line without a trailing newline.
 
 ## HCL2 support
 

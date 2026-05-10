@@ -14,6 +14,9 @@
   payloads
 - Added NDJSON line-location coverage for invalid records after blank lines
 - Added CSV rejection coverage for quote usage after leading whitespace
+- Clarified MessagePack string-key helper scope versus generic binary map keys
+- Clarified NDJSON blank-line and trailing-newline behavior
+- Clarified the strict CSV quoted-cell subset in the README
 
 - Added TOML hardening coverage for nested inline tables and nested array/object
   combinations inside the supported inline-table subset

@@ -22,6 +22,9 @@
 - The second pass on that branch added rejection coverage for malformed nested
   MessagePack payloads, NDJSON error location after blank lines, and CSV quote
   boundary misuse.
+- The current pass aligned the MessagePack/NDJSON/CSV docs with actual parser
+  behavior and added explicit coverage for MessagePack maps with non-string
+  keys.
 
 ## Current repo state
 

@@ -20,22 +20,18 @@
   - CSV alternate-delimiter and trailing-empty-cell coverage
   - a CSV parser fix for trailing characters after closing quotes
 - Remaining likely opportunities on this branch:
-  - MessagePack map-key subset clarification for helper APIs versus generic
-    binary map parsing
-  - NDJSON writer/reader contract clarification around blank lines and trailing
-    newlines
-  - CSV whitespace/quote-boundary subset clarification in README
+  - branch likely complete for now
+  - optional extra malformed CSV cases only if a concrete parser gap appears
 
 ## Recommended resume point
 
 If work resumes tomorrow, continue in this order:
 
-1. Finish the small doc/subset-alignment pass on
-   `text-hardening/msgpack-ndjson-csv`.
-2. Run `haxe build.hxml` and `haxe test.hxml` again after that pass.
-3. Commit that documentation/contract update as the likely final commit on this
-   branch.
-4. Then open `text-hardening/ini-env-properties`.
+1. Commit the MessagePack/NDJSON/CSV doc-alignment pass if it is not already
+   committed.
+2. Open `text-hardening/ini-env-properties`.
+3. Repeat the same pattern there:
+   accepted-case depth, invalid-case tightening, then subset/doc alignment.
 
 ## Current branch notes
 
