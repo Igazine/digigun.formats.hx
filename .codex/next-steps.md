@@ -26,6 +26,17 @@
     newlines
   - CSV whitespace/quote-boundary subset clarification in README
 
+## Recommended resume point
+
+If work resumes tomorrow, continue in this order:
+
+1. Finish the small doc/subset-alignment pass on
+   `text-hardening/msgpack-ndjson-csv`.
+2. Run `haxe build.hxml` and `haxe test.hxml` again after that pass.
+3. Commit that documentation/contract update as the likely final commit on this
+   branch.
+4. Then open `text-hardening/ini-env-properties`.
+
 ## Current branch notes
 
 - `text-hardening/toml-yaml-hcl` has an initial green pass.

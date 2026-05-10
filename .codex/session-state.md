@@ -23,6 +23,20 @@
   MessagePack payloads, NDJSON error location after blank lines, and CSV quote
   boundary misuse.
 
+## Current repo state
+
+- Active branch: `text-hardening/msgpack-ndjson-csv`
+- Latest commit on this branch: `097df93` (`Add rejection coverage for binary and delimited formats`)
+- Previous commit on this branch: `f99f481` (`Harden MessagePack NDJSON and CSV parsing`)
+- Latest stabilized milestone on `master`: tag `v0.2.0` at commit `572a54f`
+- Verification status at end of session:
+  - `haxe build.hxml` passed
+  - `haxe test.hxml` passed
+- Intentional untracked work still present and untouched:
+  - `src/digigun/formats/image/`
+  - `test/fixtures/image/`
+  - `test/test/image/`
+
 ## Files intentionally changed for the text milestone
 
 - Text-format implementation and tests for TOML, YAML, HCL, and MessagePack
@@ -58,3 +72,6 @@ When resuming this project in a future Codex session:
    coverage pass before moving to the next text-hardening group.
 5. Confirm whether the current goal is another text-format refinement or the
    next post-`v0.2.0` expansion.
+6. If on `text-hardening/msgpack-ndjson-csv`, start with the remaining docs and
+   subset-clarification pass before deciding whether to open
+   `text-hardening/ini-env-properties`.

@@ -59,6 +59,9 @@
   of the `v0.2.0` milestone.
 - Shared docs and test wiring were adjusted so the milestone remains text-only.
 - CI currently runs `haxe build.hxml` and `haxe test.hxml` on GitHub Actions.
+- After `v0.2.0`, text hardening continued on dedicated branches:
+  - `text-hardening/toml-yaml-hcl`
+  - `text-hardening/msgpack-ndjson-csv`
 
 ## Documentation policy captured during this session
 
