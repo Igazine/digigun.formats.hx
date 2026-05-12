@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Added EditorConfig parsing, writing, and document helpers as a thin
+  specialization over the INI document model
+- Added fixture-backed EditorConfig parse, round-trip, and invalid-input tests
+- Documented the supported EditorConfig subset in the README
+
 - Began `text-hardening/ini-env-properties`
 - Fixed INI writer quoting so string values that look like booleans or numbers
   round-trip as strings

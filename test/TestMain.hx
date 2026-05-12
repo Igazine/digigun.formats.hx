@@ -1,4 +1,5 @@
 import test.core.CoreTests;
+import test.editorconfig.EditorConfigTests;
 import test.csv.CsvTests;
 import test.env.EnvTests;
 import test.hcl.HclTests;
@@ -13,6 +14,7 @@ class TestMain {
   static function main() {
     CoreTests.run();
     IniTests.run();
+    EditorConfigTests.run();
     TomlTests.run();
     CsvTests.run();
     PropertiesTests.run();

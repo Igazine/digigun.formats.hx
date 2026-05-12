@@ -16,12 +16,13 @@
     "msgpack",
     "ndjson",
     "hcl2",
-    "cross"
+    "cross",
+    "editorconfig"
   ],
   "description": "Strongly typed, cross-platform readers and writers for file and data formats.",
   "version": "0.2.0",
   "classPath": "src",
-  "releasenote": "First major development milestone for the text-format surface, including fixture-backed stabilization work for TOML inline tables, YAML flow collections, HCL object parsing, and document-level editing helpers.",
+  "releasenote": "Text-format milestone plus continued hardening and EditorConfig support built as a thin specialization over the INI model.",
   "contributors": [
     "Igazine"
   ]

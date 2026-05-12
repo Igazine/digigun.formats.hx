@@ -1,0 +1,8 @@
+# sample editorconfig
+root = true
+indent_style = space
+escaped = hello \# world \= test
+
+[src/\[generated\].hx]
+charset = utf-8
+pattern = x\;y\:\#

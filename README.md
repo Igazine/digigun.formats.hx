@@ -4,9 +4,9 @@
 cross-platform readers and writers for data and file formats.
 
 The library currently focuses on a reusable codec abstraction and built-in INI,
-TOML, CSV, `.properties`, `.env`, YAML, MessagePack, NDJSON, and HCL2
-implementations. It is designed for direct class usage rather than a global
-registry, keeping extension points simple and type-safe.
+EditorConfig, TOML, CSV, `.properties`, `.env`, YAML, MessagePack, NDJSON, and
+HCL2 implementations. It is designed for direct class usage rather than a
+global registry, keeping extension points simple and type-safe.
 
 ## Features
 
@@ -15,6 +15,7 @@ registry, keeping extension points simple and type-safe.
 - Strongly typed core interfaces
 - Structured parse/write errors
 - Deterministic INI serialization
+- Deterministic EditorConfig serialization on top of the INI document model
 - Deterministic TOML serialization for a typed subset
 - CSV row and cell parsing with deterministic serialization
 - Editable `.properties` and `.env` documents
@@ -111,6 +112,22 @@ The built-in INI codec supports:
 The INI implementation intentionally targets a well-defined subset rather than
 every variant in the wild. Writer output uses quoting when a string would
 otherwise round-trip back as a boolean or numeric scalar.
+
+## EditorConfig support
+
+The built-in EditorConfig codec is a thin specialization over the INI document
+model and supports:
+
+- `root = true` preamble handling
+- `key = value` entries with lowercase keys
+- `[`glob`]` section headers with escaped literal glob delimiters
+- `#` and `;` comments
+- escaped `#`, `;`, `=`, `:`, and `\` in keys, values, and section globs
+- deterministic serialization of the typed document model
+
+The EditorConfig implementation intentionally stays on the same practical subset
+as the rest of the library and does not attempt to model every historical editor
+variant.
 
 ## TOML support
 
