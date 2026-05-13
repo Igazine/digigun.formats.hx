@@ -15,6 +15,7 @@ class DdsTests {
     testDdsBgraRoundTrip();
     testDdsCompressedRoundTrip();
     testDdsMipChainRoundTrip();
+    testDdsUnsupportedFourCc();
     testInvalidDds();
   }
 
@@ -85,6 +86,31 @@ class DdsTests {
         Assertions.assertEquals("invalid dds code", FormatErrorCode.InvalidInput, error.code);
       case Success(_):
         Assertions.fail("Expected invalid DDS bytes to fail.");
+    }
+  }
+
+  static function testDdsUnsupportedFourCc():Void {
+    var texture = new TextureData(digigun.formats.image.TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.BC1_RGB_UNORM);
+    var surface = texture.getOrCreatePrimarySurface();
+    surface.setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("1122334455667788"))));
+    var codec = new DdsCodec();
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        var invalid = Bytes.alloc(encoded.length);
+        invalid.blit(0, encoded, 0, encoded.length);
+        invalid.set(84, 68);
+        invalid.set(85, 88);
+        invalid.set(86, 49);
+        invalid.set(87, 48);
+        switch (codec.read(invalid)) {
+          case Failure(error):
+            Assertions.assertEquals("dds unsupported fourcc code", FormatErrorCode.UnsupportedFeature, error.code);
+          case Success(_):
+            Assertions.fail("Expected unsupported DDS fourCC to fail.");
+        }
+      case Failure(error):
+        Assertions.fail('Expected DDS compressed write to succeed: ${error.toString()}');
     }
   }
 }

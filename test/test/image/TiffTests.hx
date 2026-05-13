@@ -14,6 +14,7 @@ class TiffTests {
     testTiffFixtureParsing();
     testTiffRgbRoundTrip();
     testTiffRgbaRoundTrip();
+    testTiffUnsupportedCompression();
     testInvalidTiff();
   }
 
@@ -88,6 +89,22 @@ class TiffTests {
         Assertions.assertEquals("invalid tiff code", FormatErrorCode.InvalidInput, error.code);
       case Success(_):
         Assertions.fail("Expected invalid TIFF bytes to fail.");
+    }
+  }
+
+  static function testTiffUnsupportedCompression():Void {
+    var codec = new TiffCodec();
+    var invalid = FixtureTools.bytes("image/tiff/parse_2x2_rgb.hex");
+    invalid.set(54, 5);
+    invalid.set(55, 0);
+    invalid.set(56, 0);
+    invalid.set(57, 0);
+
+    switch (codec.read(invalid)) {
+      case Failure(error):
+        Assertions.assertEquals("tiff unsupported compression code", FormatErrorCode.UnsupportedFeature, error.code);
+      case Success(_):
+        Assertions.fail("Expected compressed TIFF bytes to fail.");
     }
   }
 }

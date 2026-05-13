@@ -14,6 +14,7 @@ class BmpTests {
     testBmpFixtureParsing();
     testBmpRgbRoundTrip();
     testBmpRgbaRoundTrip();
+    testBmpUnsupportedCompression();
     testInvalidBmp();
   }
 
@@ -89,6 +90,26 @@ class BmpTests {
         Assertions.assertEquals("invalid bmp code", FormatErrorCode.InvalidInput, error.code);
       case Success(_):
         Assertions.fail("Expected invalid BMP bytes to fail.");
+    }
+  }
+
+  static function testBmpUnsupportedCompression():Void {
+    var codec = new BmpCodec();
+    var texture = TextureData.fromBytes2D(new ImageSize(1, 1), PixelFormats.RGB8_UNORM, Bytes.ofHex("112233"));
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        var invalid = Bytes.alloc(encoded.length);
+        invalid.blit(0, encoded, 0, encoded.length);
+        invalid.set(30, 1);
+        switch (codec.read(invalid)) {
+          case Failure(error):
+            Assertions.assertEquals("bmp unsupported compression code", FormatErrorCode.UnsupportedFeature, error.code);
+          case Success(_):
+            Assertions.fail("Expected compressed BMP bytes to fail.");
+        }
+      case Failure(error):
+        Assertions.fail('Expected BMP RGB write to succeed: ${error.toString()}');
     }
   }
 }

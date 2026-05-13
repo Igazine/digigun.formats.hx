@@ -16,6 +16,7 @@ class KtxTests {
     testKtxRgbaRoundTrip();
     testKtxCompressedRoundTrip();
     testKtxMipChainRoundTrip();
+    testKtxUnsupportedArrayTexture();
     testInvalidKtx();
   }
 
@@ -82,6 +83,26 @@ class KtxTests {
         Assertions.assertEquals("invalid ktx code", FormatErrorCode.InvalidInput, error.code);
       case Success(_):
         Assertions.fail("Expected invalid KTX bytes to fail.");
+    }
+  }
+
+  static function testKtxUnsupportedArrayTexture():Void {
+    var texture = TextureData.fromBytes2D(new ImageSize(1, 1), PixelFormats.RGBA8_UNORM, Bytes.ofHex("11223344"));
+    var codec = new KtxCodec();
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        var invalid = Bytes.alloc(encoded.length);
+        invalid.blit(0, encoded, 0, encoded.length);
+        invalid.set(48, 1);
+        switch (codec.read(invalid)) {
+          case Failure(error):
+            Assertions.assertEquals("ktx unsupported array texture code", FormatErrorCode.UnsupportedFeature, error.code);
+          case Success(_):
+            Assertions.fail("Expected array KTX bytes to fail.");
+        }
+      case Failure(error):
+        Assertions.fail('Expected KTX RGBA write to succeed: ${error.toString()}');
     }
   }
 }

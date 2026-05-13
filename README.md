@@ -255,15 +255,21 @@ it rejects malformed nested block and object delimiters.
 
 The image branch focuses on a narrow, pure-Haxe texture subset:
 
-- GPU-oriented containers such as DDS, KTX, and PVR
-- simple uncompressed baselines such as BMP, RAW, PPM/PGM, and TIFF
-- TGA with optional simple RLE packets for compact low-complexity encoding
-- texture block formats such as BC1, BC3, ETC2, ASTC, and PVRTC as payload
-  targets inside the supported containers
+- `DDS`: 2D textures with BC1/BC3 payloads, plus practical 24-bit and 32-bit
+  uncompressed input/output
+- `KTX`: 2D single-face textures with RGB8/RGBA8 or BC1/BC3 payloads
+- `PVR`: 2D single-surface PVRTC1 4bpp RGBA textures
+- `BMP`: uncompressed `BI_RGB` 24-bit and 32-bit input/output
+- `TIFF`: uncompressed, contiguous, 8-bit gray/RGB/RGBA input/output
+- `TGA`: 8-bit grayscale and 24-bit/32-bit color, with optional simple RLE
+- `PPM`/`PGM`: binary `P6`/`P5` input/output
+- `RAW`: explicit byte-layout textures for direct buffer exchange
 
-Formats that depend on general-purpose compression libraries, such as PNG, are
-intentionally deferred until the separate compression project is ready. This
-keeps the image branch cross-target and stdlib-only.
+Texture block formats such as BC1, BC3, ETC2, ASTC, and PVRTC are modeled as
+payload targets inside the supported containers. Anything that depends on
+general-purpose compression libraries, such as PNG, stays deferred until the
+separate compression project is ready. This keeps the image branch cross-target
+and stdlib-only.
 
 ## Status
 

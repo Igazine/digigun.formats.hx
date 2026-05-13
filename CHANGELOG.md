@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Added image contract tests for unsupported BMP compression, DDS fourCC,
+  KTX array textures, PVR multi-surface inputs, TIFF compression, and TGA
+  color-mapped headers
+- Tightened the README image support matrix to spell out the supported subset
+  per format
 - Added image-suite runner wiring to `TestMain` and covered TGA RLE round-trips
   with a fixture-backed regression test
 - Added simple TGA RLE packet support as a pure-Haxe low-complexity texture

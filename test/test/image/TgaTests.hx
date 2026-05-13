@@ -14,6 +14,7 @@ class TgaTests {
     testTgaBgrRoundTrip();
     testTgaGrayscaleRoundTrip();
     testTgaRleRoundTrip();
+    testTgaColorMappedUnsupported();
     testInvalidTga();
   }
 
@@ -82,6 +83,16 @@ class TgaTests {
         Assertions.assertEquals("invalid tga code", FormatErrorCode.InvalidInput, error.code);
       case Success(_):
         Assertions.fail("Expected invalid TGA bytes to fail.");
+    }
+  }
+
+  static function testTgaColorMappedUnsupported():Void {
+    var codec = new TgaCodec();
+    switch (codec.read(Bytes.ofHex("000100000000000000000000000000000000"))) {
+      case Failure(error):
+        Assertions.assertEquals("tga color-mapped unsupported code", FormatErrorCode.UnsupportedFeature, error.code);
+      case Success(_):
+        Assertions.fail("Expected color-mapped TGA bytes to fail.");
     }
   }
 }
