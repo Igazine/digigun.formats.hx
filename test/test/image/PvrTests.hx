@@ -15,6 +15,7 @@ class PvrTests {
   public static function run():Void {
     testPvrRoundTrip();
     testPvrUnsupportedSurfaceCount();
+    testPvrUnsupportedPixelFormatHigh();
     testInvalidPvr();
   }
 
@@ -61,6 +62,27 @@ class PvrTests {
             Assertions.assertEquals("pvr unsupported surface count code", FormatErrorCode.UnsupportedFeature, error.code);
           case Success(_):
             Assertions.fail("Expected multi-surface PVR bytes to fail.");
+        }
+      case Failure(error):
+        Assertions.fail('Expected PVR write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testPvrUnsupportedPixelFormatHigh():Void {
+    var texture = new TextureData(TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.PVRTC1_4_RGBA_UNORM);
+    texture.getOrCreatePrimarySurface().setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("1122334455667788"))));
+    var codec = new PvrCodec();
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        var invalid = Bytes.alloc(encoded.length);
+        invalid.blit(0, encoded, 0, encoded.length);
+        invalid.set(12, 1);
+        switch (codec.read(invalid)) {
+          case Failure(error):
+            Assertions.assertEquals("pvr unsupported pixel format high code", FormatErrorCode.UnsupportedFeature, error.code);
+          case Success(_):
+            Assertions.fail("Expected extended PVR pixel format bytes to fail.");
         }
       case Failure(error):
         Assertions.fail('Expected PVR write to succeed: ${error.toString()}');

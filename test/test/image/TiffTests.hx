@@ -15,6 +15,7 @@ class TiffTests {
     testTiffRgbRoundTrip();
     testTiffRgbaRoundTrip();
     testTiffUnsupportedCompression();
+    testTiffUnsupportedPlanarConfiguration();
     testInvalidTiff();
   }
 
@@ -105,6 +106,20 @@ class TiffTests {
         Assertions.assertEquals("tiff unsupported compression code", FormatErrorCode.UnsupportedFeature, error.code);
       case Success(_):
         Assertions.fail("Expected compressed TIFF bytes to fail.");
+    }
+  }
+
+  static function testTiffUnsupportedPlanarConfiguration():Void {
+    var codec = new TiffCodec();
+    var invalid = FixtureTools.bytes("image/tiff/parse_2x2_rgb.hex");
+    invalid.set(126, 2);
+    invalid.set(127, 0);
+
+    switch (codec.read(invalid)) {
+      case Failure(error):
+        Assertions.assertEquals("tiff unsupported planar configuration code", FormatErrorCode.UnsupportedFeature, error.code);
+      case Success(_):
+        Assertions.fail("Expected planar TIFF bytes to fail.");
     }
   }
 }

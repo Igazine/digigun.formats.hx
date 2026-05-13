@@ -15,6 +15,7 @@ class BmpTests {
     testBmpRgbRoundTrip();
     testBmpRgbaRoundTrip();
     testBmpUnsupportedCompression();
+    testBmpUnsupportedInfoHeader();
     testInvalidBmp();
   }
 
@@ -110,6 +111,21 @@ class BmpTests {
         }
       case Failure(error):
         Assertions.fail('Expected BMP RGB write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testBmpUnsupportedInfoHeader():Void {
+    var codec = new BmpCodec();
+    var encoded = FixtureTools.bytes("image/bmp/parse_2x2_24.hex");
+    var invalid = Bytes.alloc(encoded.length);
+    invalid.blit(0, encoded, 0, encoded.length);
+    invalid.set(14, 124);
+
+    switch (codec.read(invalid)) {
+      case Failure(error):
+        Assertions.assertEquals("bmp unsupported info header code", FormatErrorCode.UnsupportedFeature, error.code);
+      case Success(_):
+        Assertions.fail("Expected extended BMP info header to fail.");
     }
   }
 }

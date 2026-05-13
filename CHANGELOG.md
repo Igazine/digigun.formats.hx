@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added additional image edge-case coverage for unsupported BMP info-header
+  sizes, truncated TGA RLE packets, unsupported TIFF planar configuration, and
+  unsupported PVR pixel-format metadata
 - Added image contract tests for unsupported BMP compression, DDS fourCC,
   KTX array textures, PVR multi-surface inputs, TIFF compression, and TGA
   color-mapped headers

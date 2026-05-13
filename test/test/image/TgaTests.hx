@@ -15,6 +15,7 @@ class TgaTests {
     testTgaGrayscaleRoundTrip();
     testTgaRleRoundTrip();
     testTgaColorMappedUnsupported();
+    testTgaRleTruncatedPacket();
     testInvalidTga();
   }
 
@@ -93,6 +94,16 @@ class TgaTests {
         Assertions.assertEquals("tga color-mapped unsupported code", FormatErrorCode.UnsupportedFeature, error.code);
       case Success(_):
         Assertions.fail("Expected color-mapped TGA bytes to fail.");
+    }
+  }
+
+  static function testTgaRleTruncatedPacket():Void {
+    var codec = new TgaCodec();
+    switch (codec.read(Bytes.ofHex("00000b00000000000000000001000100080181"))) {
+      case Failure(error):
+        Assertions.assertEquals("tga truncated rle code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected truncated TGA RLE bytes to fail.");
     }
   }
 }
