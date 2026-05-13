@@ -26,6 +26,9 @@ class TextureSupportTests {
     Assertions.assertTrue("d3d supports bc3", TextureFormatSupport.canUpload(GraphicsApi.Direct3D11, PixelFormats.BC3_RGBA_UNORM));
     Assertions.assertTrue("d3d supports bc4", TextureFormatSupport.canUpload(GraphicsApi.Direct3D11, PixelFormats.BC4_R_UNORM));
     Assertions.assertTrue("vulkan supports bc5", TextureFormatSupport.canUpload(GraphicsApi.Vulkan, PixelFormats.BC5_RG_UNORM));
+    Assertions.assertTrue("webgl supports etc2 rgba", TextureFormatSupport.canUpload(GraphicsApi.WebGL, PixelFormats.ETC2_RGBA8_UNORM));
+    Assertions.assertTrue("webgl supports eac r11", TextureFormatSupport.canUpload(GraphicsApi.WebGL, PixelFormats.EAC_R11_UNORM));
+    Assertions.assertTrue("opengl supports eac rg11", TextureFormatSupport.canUpload(GraphicsApi.OpenGL, PixelFormats.EAC_RG11_UNORM));
     Assertions.assertTrue("webgl supports etc2", TextureFormatSupport.canUpload(GraphicsApi.WebGL, PixelFormats.ETC2_RGB8_UNORM));
     Assertions.assertTrue("webgl rejects pvrtc baseline helper", !TextureFormatSupport.canUpload(GraphicsApi.WebGL, PixelFormats.PVRTC1_4_RGBA_UNORM));
   }
@@ -46,11 +49,17 @@ class TextureSupportTests {
     Assertions.assertEquals("astc block bytes", 16, info.blockBytes);
     Assertions.assertEquals("bc4 method", TextureCompressionMethod.BC4, TextureCompressionSupport.infoForFormat(PixelFormats.BC4_R_UNORM).method);
     Assertions.assertEquals("bc5 method", TextureCompressionMethod.BC5, TextureCompressionSupport.infoForFormat(PixelFormats.BC5_RG_UNORM).method);
+    Assertions.assertEquals("etc2 rgba method", TextureCompressionMethod.ETC2Rgba8, TextureCompressionSupport.infoForFormat(PixelFormats.ETC2_RGBA8_UNORM).method);
+    Assertions.assertEquals("eac r11 method", TextureCompressionMethod.EacR11, TextureCompressionSupport.infoForFormat(PixelFormats.EAC_R11_UNORM).method);
+    Assertions.assertEquals("eac rg11 method", TextureCompressionMethod.EacRg11, TextureCompressionSupport.infoForFormat(PixelFormats.EAC_RG11_UNORM).method);
 
     var profile = TextureCompressionSupport.containerProfile(TextureContainerFormat.Ktx);
     Assertions.assertTrue("ktx supports astc", profile.supportedFormatIds.indexOf(PixelFormats.ASTC_4X4_RGBA_UNORM.id) >= 0);
     Assertions.assertTrue("ktx supports bc4", profile.supportedFormatIds.indexOf(PixelFormats.BC4_R_UNORM.id) >= 0);
     Assertions.assertTrue("ktx supports bc5", profile.supportedFormatIds.indexOf(PixelFormats.BC5_RG_UNORM.id) >= 0);
+    Assertions.assertTrue("ktx supports etc2 rgba", profile.supportedFormatIds.indexOf(PixelFormats.ETC2_RGBA8_UNORM.id) >= 0);
+    Assertions.assertTrue("ktx supports eac r11", profile.supportedFormatIds.indexOf(PixelFormats.EAC_R11_UNORM.id) >= 0);
+    Assertions.assertTrue("ktx supports eac rg11", profile.supportedFormatIds.indexOf(PixelFormats.EAC_RG11_UNORM.id) >= 0);
     Assertions.assertTrue("dds supports bc4", TextureCompressionSupport.containerProfile(TextureContainerFormat.Dds).supportedFormatIds.indexOf(PixelFormats.BC4_R_UNORM.id) >= 0);
     Assertions.assertTrue("dds supports bc5", TextureCompressionSupport.containerProfile(TextureContainerFormat.Dds).supportedFormatIds.indexOf(PixelFormats.BC5_RG_UNORM.id) >= 0);
     Assertions.assertTrue("dds rejects astc baseline profile", TextureCompressionSupport.containerProfile(TextureContainerFormat.Dds).supportedFormatIds.indexOf(PixelFormats.ASTC_4X4_RGBA_UNORM.id) < 0);
@@ -81,6 +90,18 @@ class TextureSupportTests {
     var d3dRgPlan = TextureCompressionSupport.buildPlan(new TextureEncodingRequest(GraphicsApi.Direct3D11, rgTexture, false, false, false, TextureContainerFormat.Dds));
     Assertions.assertEquals("d3d rg plan prefers bc5", PixelFormats.BC5_RG_UNORM.id, d3dRgPlan.outputFormat.id);
     Assertions.assertEquals("d3d rg method", TextureCompressionMethod.BC5, d3dRgPlan.compressionMethod);
+
+    var webglRPlan = TextureCompressionSupport.buildPlan(new TextureEncodingRequest(GraphicsApi.WebGL, rTexture, false, false, false, TextureContainerFormat.Ktx));
+    Assertions.assertEquals("webgl r plan prefers eac r11", PixelFormats.EAC_R11_UNORM.id, webglRPlan.outputFormat.id);
+    Assertions.assertEquals("webgl r method", TextureCompressionMethod.EacR11, webglRPlan.compressionMethod);
+
+    var webglRgPlan = TextureCompressionSupport.buildPlan(new TextureEncodingRequest(GraphicsApi.WebGL, rgTexture, false, false, false, TextureContainerFormat.Ktx));
+    Assertions.assertEquals("webgl rg plan prefers eac rg11", PixelFormats.EAC_RG11_UNORM.id, webglRgPlan.outputFormat.id);
+    Assertions.assertEquals("webgl rg method", TextureCompressionMethod.EacRg11, webglRgPlan.compressionMethod);
+
+    var webglAlphaPlan = TextureCompressionSupport.buildPlan(new TextureEncodingRequest(GraphicsApi.WebGL, rgbaTexture, true, false, false, TextureContainerFormat.Ktx));
+    Assertions.assertEquals("webgl alpha plan prefers etc2 rgba", PixelFormats.ETC2_RGBA8_UNORM.id, webglAlphaPlan.outputFormat.id);
+    Assertions.assertEquals("webgl alpha method", TextureCompressionMethod.ETC2Rgba8, webglAlphaPlan.compressionMethod);
 
     var forcedCompressedPlan = TextureCompressionSupport.buildPlan(new TextureEncodingRequest(GraphicsApi.WebGL, rgbTexture, false, false, false, TextureContainerFormat.Pvr));
     Assertions.assertEquals("forced compressed falls back to api container", TextureContainerFormat.Ktx, forcedCompressedPlan.container);

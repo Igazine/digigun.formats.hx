@@ -16,6 +16,9 @@ class KtxTests {
     testKtxRgbaRoundTrip();
     testKtxRgRoundTrip();
     testKtxCompressedRoundTrip();
+    testKtxEtc2RgbaRoundTrip();
+    testKtxEacR11RoundTrip();
+    testKtxEacRg11RoundTrip();
     testKtxBc4RoundTrip();
     testKtxBc5RoundTrip();
     testKtxMipChainRoundTrip();
@@ -72,6 +75,60 @@ class KtxTests {
         }
       case Failure(error):
         Assertions.fail('Expected KTX compressed write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testKtxEtc2RgbaRoundTrip():Void {
+    var texture = new TextureData(TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.ETC2_RGBA8_UNORM);
+    texture.getOrCreatePrimarySurface().setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("00112233445566778899aabbccddeeff"))));
+    var codec = new KtxCodec();
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        switch (codec.read(encoded)) {
+          case Success(parsed):
+            Assertions.assertEquals("ktx etc2 rgba format", PixelFormats.ETC2_RGBA8_UNORM.id, parsed.format.id);
+            Assertions.assertEquals("ktx etc2 rgba byte length", 16, parsed.getPrimaryMipLevel().data.length);
+          case Failure(error):
+            Assertions.fail('Expected KTX ETC2 RGBA parse to succeed: ${error.toString()}');
+        }
+      case Failure(error):
+        Assertions.fail('Expected KTX ETC2 RGBA write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testKtxEacR11RoundTrip():Void {
+    var texture = new TextureData(TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.EAC_R11_UNORM);
+    texture.getOrCreatePrimarySurface().setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("1122334455667788"))));
+    var codec = new KtxCodec();
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        switch (codec.read(encoded)) {
+          case Success(parsed):
+            Assertions.assertEquals("ktx eac r11 format", PixelFormats.EAC_R11_UNORM.id, parsed.format.id);
+            Assertions.assertEquals("ktx eac r11 byte length", 8, parsed.getPrimaryMipLevel().data.length);
+          case Failure(error):
+            Assertions.fail('Expected KTX EAC R11 parse to succeed: ${error.toString()}');
+        }
+      case Failure(error):
+        Assertions.fail('Expected KTX EAC R11 write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testKtxEacRg11RoundTrip():Void {
+    var texture = new TextureData(TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.EAC_RG11_UNORM);
+    texture.getOrCreatePrimarySurface().setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("112233445566778899aabbccddeeff00"))));
+    var codec = new KtxCodec();
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        switch (codec.read(encoded)) {
+          case Success(parsed):
+            Assertions.assertEquals("ktx eac rg11 format", PixelFormats.EAC_RG11_UNORM.id, parsed.format.id);
+            Assertions.assertEquals("ktx eac rg11 byte length", 16, parsed.getPrimaryMipLevel().data.length);
+          case Failure(error):
+            Assertions.fail('Expected KTX EAC RG11 parse to succeed: ${error.toString()}');
+        }
+      case Failure(error):
+        Assertions.fail('Expected KTX EAC RG11 write to succeed: ${error.toString()}');
     }
   }
 

@@ -46,6 +46,15 @@ class PixelFormats {
   /** ETC2 compressed RGB data. */
   public static final ETC2_RGB8_UNORM = new PixelFormat("etc2-rgb8-unorm", null, null, ColorSpace.Linear, CompressedFormatFamily.ETC2, 4, 4, 8);
 
+  /** ETC2 compressed RGBA data with separate alpha. */
+  public static final ETC2_RGBA8_UNORM = new PixelFormat("etc2-rgba8-unorm", null, null, ColorSpace.Linear, CompressedFormatFamily.ETC2, 4, 4, 16);
+
+  /** EAC compressed single-channel data. */
+  public static final EAC_R11_UNORM = new PixelFormat("eac-r11-unorm", null, null, ColorSpace.Linear, CompressedFormatFamily.ETC2, 4, 4, 8);
+
+  /** EAC compressed dual-channel data. */
+  public static final EAC_RG11_UNORM = new PixelFormat("eac-rg11-unorm", null, null, ColorSpace.Linear, CompressedFormatFamily.ETC2, 4, 4, 16);
+
   /** ASTC 4x4 compressed RGBA data. */
   public static final ASTC_4X4_RGBA_UNORM = new PixelFormat("astc-4x4-rgba-unorm", null, null, ColorSpace.Linear, CompressedFormatFamily.ASTC, 4, 4, 16);
 
@@ -85,6 +94,12 @@ class PixelFormats {
         BC5_RG_UNORM;
       case "etc2-rgb8-unorm":
         ETC2_RGB8_UNORM;
+      case "etc2-rgba8-unorm":
+        ETC2_RGBA8_UNORM;
+      case "eac-r11-unorm":
+        EAC_R11_UNORM;
+      case "eac-rg11-unorm":
+        EAC_RG11_UNORM;
       case "astc-4x4-rgba-unorm":
         ASTC_4X4_RGBA_UNORM;
       case "pvrtc1-4-rgba-unorm":

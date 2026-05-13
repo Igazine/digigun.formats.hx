@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added ETC2 RGBA8, EAC R11, and EAC RG11 texture compression support with
+  KTX wiring, upload checks, and planner coverage for alpha and channel-based
+  sources
 - Added BC4 / BC5 texture compression support plus RG8 container and upload
   handling across the texture pipeline
 - Added BC4 and BC5 encoder coverage, KTX and DDS round-trips, and planning

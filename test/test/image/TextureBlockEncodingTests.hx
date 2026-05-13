@@ -7,7 +7,10 @@ import digigun.formats.image.Bc4TextureBlockEncoder;
 import digigun.formats.image.Bc3TextureBlockEncoder;
 import digigun.formats.image.Bc5TextureBlockEncoder;
 import digigun.formats.image.ByteBuffer;
+import digigun.formats.image.EacR11TextureBlockEncoder;
+import digigun.formats.image.EacRg11TextureBlockEncoder;
 import digigun.formats.image.Etc2Rgb8TextureBlockEncoder;
+import digigun.formats.image.Etc2Rgba8TextureBlockEncoder;
 import digigun.formats.image.ImageSize;
 import digigun.formats.image.MipLevel;
 import digigun.formats.image.PixelFormats;
@@ -30,6 +33,9 @@ class TextureBlockEncodingTests {
     testRealBc4Encoding();
     testRealBc5Encoding();
     testRealEtc2Encoding();
+    testRealEtc2RgbaEncoding();
+    testRealEacR11Encoding();
+    testRealEacRg11Encoding();
     testPlannedEncodeDispatch();
   }
 
@@ -43,6 +49,9 @@ class TextureBlockEncodingTests {
     Assertions.assertTrue("bc4 encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.BC4), Bc4TextureBlockEncoder));
     Assertions.assertTrue("bc5 encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.BC5), Bc5TextureBlockEncoder));
     Assertions.assertTrue("etc2 encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.ETC2Rgb8), Etc2Rgb8TextureBlockEncoder));
+    Assertions.assertTrue("etc2 rgba encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.ETC2Rgba8), Etc2Rgba8TextureBlockEncoder));
+    Assertions.assertTrue("eac r11 encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.EacR11), EacR11TextureBlockEncoder));
+    Assertions.assertTrue("eac rg11 encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.EacRg11), EacRg11TextureBlockEncoder));
   }
 
   static function testCompressedPassthrough():Void {
@@ -161,6 +170,63 @@ class TextureBlockEncodingTests {
     }
   }
 
+  static function testRealEtc2RgbaEncoding():Void {
+    var source = Bytes.alloc(4 * 4 * 4);
+    for (pixel in 0...16) {
+      var offset = pixel * 4;
+      source.set(offset, 0x00);
+      source.set(offset + 1, 0xff);
+      source.set(offset + 2, 0x00);
+      source.set(offset + 3, 0xff);
+    }
+    var texture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.RGBA8_UNORM, source);
+    var encoder = TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.ETC2Rgba8);
+    switch (encoder.encode(texture, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertTrue("etc2 rgba real encode not passthrough", !result.wasPassthrough);
+        Assertions.assertEquals("etc2 rgba encoded format", PixelFormats.ETC2_RGBA8_UNORM.id, result.texture.format.id);
+        Assertions.assertEquals("etc2 rgba encoded byte length", 16, result.texture.getPrimaryMipLevel().data.length);
+      case Failure(error):
+        Assertions.fail('Expected real ETC2 RGBA encoding to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testRealEacR11Encoding():Void {
+    var source = Bytes.alloc(4 * 4);
+    for (pixel in 0...16) {
+      source.set(pixel, 0x80);
+    }
+    var texture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.R8_UNORM, source);
+    var encoder = TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.EacR11);
+    switch (encoder.encode(texture, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertTrue("eac r11 real encode not passthrough", !result.wasPassthrough);
+        Assertions.assertEquals("eac r11 encoded format", PixelFormats.EAC_R11_UNORM.id, result.texture.format.id);
+        Assertions.assertEquals("eac r11 encoded byte length", 8, result.texture.getPrimaryMipLevel().data.length);
+      case Failure(error):
+        Assertions.fail('Expected real EAC R11 encoding to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testRealEacRg11Encoding():Void {
+    var source = Bytes.alloc(4 * 4 * 2);
+    for (pixel in 0...16) {
+      var offset = pixel * 2;
+      source.set(offset, 0x80);
+      source.set(offset + 1, 0x40);
+    }
+    var texture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.RG8_UNORM, source);
+    var encoder = TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.EacRg11);
+    switch (encoder.encode(texture, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertTrue("eac rg11 real encode not passthrough", !result.wasPassthrough);
+        Assertions.assertEquals("eac rg11 encoded format", PixelFormats.EAC_RG11_UNORM.id, result.texture.format.id);
+        Assertions.assertEquals("eac rg11 encoded byte length", 16, result.texture.getPrimaryMipLevel().data.length);
+      case Failure(error):
+        Assertions.fail('Expected real EAC RG11 encoding to succeed: ${error.toString()}');
+    }
+  }
+
   static function testPlannedEncodeDispatch():Void {
     var compressedTexture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.BC3_RGBA_UNORM, Bytes.ofHex("00112233445566778899aabbccddeeff"));
     var compressedRequest = new TextureEncodingRequest(digigun.formats.image.GraphicsApi.Direct3D11, compressedTexture, true, false, false, TextureContainerFormat.Dds);
@@ -221,6 +287,36 @@ class TextureBlockEncodingTests {
         Assertions.assertEquals("planned etc2 dispatch format", PixelFormats.ETC2_RGB8_UNORM.id, result.texture.format.id);
       case Failure(error):
         Assertions.fail('Expected planned ETC2 encode dispatch to succeed: ${error.toString()}');
+    }
+
+    var webAlphaTexture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.RGBA8_UNORM, Bytes.alloc(64));
+    var webAlphaRequest = new TextureEncodingRequest(digigun.formats.image.GraphicsApi.WebGL, webAlphaTexture, true, false, false, TextureContainerFormat.Ktx);
+    switch (TextureBlockEncodingSupport.encode(webAlphaRequest, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertEquals("planned etc2 rgba dispatch method", TextureCompressionMethod.ETC2Rgba8, result.method);
+        Assertions.assertEquals("planned etc2 rgba dispatch format", PixelFormats.ETC2_RGBA8_UNORM.id, result.texture.format.id);
+      case Failure(error):
+        Assertions.fail('Expected planned ETC2 RGBA encode dispatch to succeed: ${error.toString()}');
+    }
+
+    var webRTexture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.R8_UNORM, Bytes.alloc(16));
+    var webRRequest = new TextureEncodingRequest(digigun.formats.image.GraphicsApi.WebGL, webRTexture, false, false, false, TextureContainerFormat.Ktx);
+    switch (TextureBlockEncodingSupport.encode(webRRequest, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertEquals("planned eac r11 dispatch method", TextureCompressionMethod.EacR11, result.method);
+        Assertions.assertEquals("planned eac r11 dispatch format", PixelFormats.EAC_R11_UNORM.id, result.texture.format.id);
+      case Failure(error):
+        Assertions.fail('Expected planned EAC R11 encode dispatch to succeed: ${error.toString()}');
+    }
+
+    var webRgTexture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.RG8_UNORM, Bytes.alloc(32));
+    var webRgRequest = new TextureEncodingRequest(digigun.formats.image.GraphicsApi.WebGL, webRgTexture, false, false, false, TextureContainerFormat.Ktx);
+    switch (TextureBlockEncodingSupport.encode(webRgRequest, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertEquals("planned eac rg11 dispatch method", TextureCompressionMethod.EacRg11, result.method);
+        Assertions.assertEquals("planned eac rg11 dispatch format", PixelFormats.EAC_RG11_UNORM.id, result.texture.format.id);
+      case Failure(error):
+        Assertions.fail('Expected planned EAC RG11 encode dispatch to succeed: ${error.toString()}');
     }
   }
 }

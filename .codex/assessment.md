@@ -51,6 +51,8 @@
 - TIFF is kept as an uncompressed baseline only.
 - BC4 / BC5 and RG8 are now part of the practical texture checkpoint as a
   lightweight extension to the GPU-oriented image branch.
+- ETC2 RGBA8 and EAC R11/RG11 are also part of the practical texture
+  checkpoint for Khronos/WebGL-style targets.
 - The public README now lists the supported subset per format.
 - A canonical image example now demonstrates `TextureData`, `TgaCodec`, and
   compression planning in one place.
@@ -95,7 +97,8 @@
   and the latest work checkpoint focused on stabilization docs/examples.
 - The text-format packages now live under `digigun.formats.text.<format>`.
 - The current image extension checkpoint now includes BC4 / BC5 block formats,
-  RG8 uncompressed support, and DDS/KTX container wiring for those payloads.
+  RG8 uncompressed support, ETC2 RGBA8, EAC R11/RG11, and DDS/KTX container
+  wiring for those payloads.
 - After `0.3.0`, text hardening continued on dedicated branches:
   - `text-hardening/toml-yaml-hcl`
   - `text-hardening/msgpack-ndjson-csv`

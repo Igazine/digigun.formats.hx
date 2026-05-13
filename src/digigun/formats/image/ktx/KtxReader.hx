@@ -97,6 +97,14 @@ class KtxReader implements FormatReader<Bytes, TextureData> {
         PixelFormats.BC4_R_UNORM;
       case 0x8dbd if (glType == 0 && glFormat == 0):
         PixelFormats.BC5_RG_UNORM;
+      case 0x9274 if (glType == 0 && glFormat == 0):
+        PixelFormats.ETC2_RGB8_UNORM;
+      case 0x9278 if (glType == 0 && glFormat == 0):
+        PixelFormats.ETC2_RGBA8_UNORM;
+      case 0x9270 if (glType == 0 && glFormat == 0):
+        PixelFormats.EAC_R11_UNORM;
+      case 0x9272 if (glType == 0 && glFormat == 0):
+        PixelFormats.EAC_RG11_UNORM;
       default:
         null;
     };

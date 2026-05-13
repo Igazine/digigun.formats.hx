@@ -77,6 +77,14 @@ class KtxWriter implements FormatWriter<TextureData, Bytes> {
         new KtxWriteFormatInfo(0, 1, 0, 0x8dbb, 0x1903);
       case "bc5-rg-unorm":
         new KtxWriteFormatInfo(0, 1, 0, 0x8dbd, 0x8227);
+      case "etc2-rgb8-unorm":
+        new KtxWriteFormatInfo(0, 1, 0, 0x9274, 0x1907);
+      case "etc2-rgba8-unorm":
+        new KtxWriteFormatInfo(0, 1, 0, 0x9278, 0x1908);
+      case "eac-r11-unorm":
+        new KtxWriteFormatInfo(0, 1, 0, 0x9270, 0x1903);
+      case "eac-rg11-unorm":
+        new KtxWriteFormatInfo(0, 1, 0, 0x9272, 0x8227);
       default:
         null;
     };

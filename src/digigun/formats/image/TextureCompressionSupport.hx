@@ -19,6 +19,12 @@ class TextureCompressionSupport {
         new TextureCompressionInfo(TextureCompressionMethod.BC5, PixelFormats.BC5_RG_UNORM, 4, 4, 16, "BC5 / RGTC2 block compression for dual-channel textures and normal maps.");
       case "etc2-rgb8-unorm":
         new TextureCompressionInfo(TextureCompressionMethod.ETC2Rgb8, PixelFormats.ETC2_RGB8_UNORM, 4, 4, 8, "ETC2 RGB block compression, especially relevant for OpenGL ES and WebGL 2.");
+      case "etc2-rgba8-unorm":
+        new TextureCompressionInfo(TextureCompressionMethod.ETC2Rgba8, PixelFormats.ETC2_RGBA8_UNORM, 4, 4, 16, "ETC2 RGBA block compression with separate alpha.");
+      case "eac-r11-unorm":
+        new TextureCompressionInfo(TextureCompressionMethod.EacR11, PixelFormats.EAC_R11_UNORM, 4, 4, 8, "EAC R11 block compression for single-channel textures and masks.");
+      case "eac-rg11-unorm":
+        new TextureCompressionInfo(TextureCompressionMethod.EacRg11, PixelFormats.EAC_RG11_UNORM, 4, 4, 16, "EAC RG11 block compression for dual-channel textures and vector maps.");
       case "astc-4x4-rgba-unorm":
         new TextureCompressionInfo(TextureCompressionMethod.Astc4x4Rgba, PixelFormats.ASTC_4X4_RGBA_UNORM, 4, 4, 16, "ASTC 4x4 RGBA block compression for modern mobile and desktop APIs.");
       case "pvrtc1-4-rgba-unorm":
@@ -43,6 +49,12 @@ class TextureCompressionSupport {
         PixelFormats.BC5_RG_UNORM;
       case TextureCompressionMethod.ETC2Rgb8:
         PixelFormats.ETC2_RGB8_UNORM;
+      case TextureCompressionMethod.ETC2Rgba8:
+        PixelFormats.ETC2_RGBA8_UNORM;
+      case TextureCompressionMethod.EacR11:
+        PixelFormats.EAC_R11_UNORM;
+      case TextureCompressionMethod.EacRg11:
+        PixelFormats.EAC_RG11_UNORM;
       case TextureCompressionMethod.Astc4x4Rgba:
         PixelFormats.ASTC_4X4_RGBA_UNORM;
       case TextureCompressionMethod.Pvrtc1_4Rgba:
@@ -70,6 +82,9 @@ class TextureCompressionSupport {
           PixelFormats.BC4_R_UNORM.id,
           PixelFormats.BC5_RG_UNORM.id,
           PixelFormats.ETC2_RGB8_UNORM.id,
+          PixelFormats.ETC2_RGBA8_UNORM.id,
+          PixelFormats.EAC_R11_UNORM.id,
+          PixelFormats.EAC_RG11_UNORM.id,
           PixelFormats.ASTC_4X4_RGBA_UNORM.id,
           PixelFormats.PVRTC1_4_RGBA_UNORM.id
         ]);
@@ -92,6 +107,9 @@ class TextureCompressionSupport {
           PixelFormats.BC4_R_UNORM.id,
           PixelFormats.BC5_RG_UNORM.id,
           PixelFormats.ETC2_RGB8_UNORM.id,
+          PixelFormats.ETC2_RGBA8_UNORM.id,
+          PixelFormats.EAC_R11_UNORM.id,
+          PixelFormats.EAC_RG11_UNORM.id,
           PixelFormats.ASTC_4X4_RGBA_UNORM.id
         ]);
       case TextureContainerFormat.Pvr:
@@ -147,17 +165,21 @@ class TextureCompressionSupport {
     var preferDualChannel = sourceOrder == ChannelOrder.RG;
     var profile = containerProfile(container);
     var candidates = candidateFormatsForApi(request.api, request.requireAlpha || sourceHasAlpha);
-    if (!request.requireAlpha && preferSingleChannel) {
-      reorderCandidate(candidates, PixelFormats.BC4_R_UNORM);
+    if (request.requireAlpha && sourceHasAlpha) {
+      reorderCandidate(candidates, PixelFormats.ETC2_RGBA8_UNORM);
+    } else if (!request.requireAlpha && preferSingleChannel) {
+      reorderCandidate(candidates, request.api == GraphicsApi.Direct3D11 ? PixelFormats.BC4_R_UNORM : PixelFormats.EAC_R11_UNORM);
     } else if (!request.requireAlpha && preferDualChannel) {
-      reorderCandidate(candidates, PixelFormats.BC5_RG_UNORM);
+      reorderCandidate(candidates, request.api == GraphicsApi.Direct3D11 ? PixelFormats.BC5_RG_UNORM : PixelFormats.EAC_RG11_UNORM);
+    } else if (!request.requireAlpha && !sourceHasAlpha) {
+      reorderCandidate(candidates, PixelFormats.ETC2_RGB8_UNORM);
     }
-    if (!request.requireAlpha && !sourceHasAlpha && !preferSingleChannel && !preferDualChannel) {
+    if ((request.requireAlpha || sourceHasAlpha) && baseline.id == PixelFormats.BC3_RGBA_UNORM.id && candidates.indexOf(PixelFormats.BC3_RGBA_UNORM) < 0) {
+      candidates.unshift(PixelFormats.BC3_RGBA_UNORM);
+    } else if (!request.requireAlpha && !sourceHasAlpha && !preferSingleChannel && !preferDualChannel) {
       if (candidates.indexOf(PixelFormats.BC1_RGB_UNORM) < 0) {
         candidates.unshift(PixelFormats.BC1_RGB_UNORM);
       }
-    } else if ((request.requireAlpha || sourceHasAlpha) && baseline.id == PixelFormats.BC3_RGBA_UNORM.id && candidates.indexOf(PixelFormats.BC3_RGBA_UNORM) < 0) {
-      candidates.unshift(PixelFormats.BC3_RGBA_UNORM);
     }
 
     for (candidate in candidates) {
@@ -201,16 +223,16 @@ class TextureCompressionSupport {
     return switch (api) {
       case GraphicsApi.OpenGL:
         needAlpha
-          ? [PixelFormats.BC3_RGBA_UNORM, PixelFormats.ASTC_4X4_RGBA_UNORM]
-          : [PixelFormats.BC1_RGB_UNORM, PixelFormats.BC4_R_UNORM, PixelFormats.ETC2_RGB8_UNORM];
+          ? [PixelFormats.ETC2_RGBA8_UNORM, PixelFormats.BC3_RGBA_UNORM, PixelFormats.ASTC_4X4_RGBA_UNORM]
+          : [PixelFormats.ETC2_RGB8_UNORM, PixelFormats.EAC_R11_UNORM, PixelFormats.EAC_RG11_UNORM, PixelFormats.BC1_RGB_UNORM];
       case GraphicsApi.WebGL:
         needAlpha
-          ? [PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.BC3_RGBA_UNORM]
-          : [PixelFormats.ETC2_RGB8_UNORM, PixelFormats.BC1_RGB_UNORM];
+          ? [PixelFormats.ETC2_RGBA8_UNORM, PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.BC3_RGBA_UNORM]
+          : [PixelFormats.ETC2_RGB8_UNORM, PixelFormats.EAC_R11_UNORM, PixelFormats.EAC_RG11_UNORM, PixelFormats.BC1_RGB_UNORM];
       case GraphicsApi.Vulkan:
         needAlpha
-          ? [PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.BC3_RGBA_UNORM]
-          : [PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.ETC2_RGB8_UNORM, PixelFormats.BC5_RG_UNORM, PixelFormats.BC1_RGB_UNORM];
+          ? [PixelFormats.ETC2_RGBA8_UNORM, PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.BC3_RGBA_UNORM]
+          : [PixelFormats.ETC2_RGB8_UNORM, PixelFormats.EAC_R11_UNORM, PixelFormats.EAC_RG11_UNORM, PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.BC5_RG_UNORM, PixelFormats.BC1_RGB_UNORM];
       case GraphicsApi.Metal:
         needAlpha
           ? [PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.PVRTC1_4_RGBA_UNORM, PixelFormats.BC3_RGBA_UNORM]

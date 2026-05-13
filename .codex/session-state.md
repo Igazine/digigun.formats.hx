@@ -19,6 +19,8 @@
 - BC4 / BC5 texture compression support is wired through the pixel model,
   block encoders, DDS/KTX containers, planning helpers, and tests. RG8 is the
   current uncompressed two-channel baseline.
+- ETC2 RGBA8 plus EAC R11/RG11 are now wired through the same image pipeline
+  for Khronos/WebGL-style targets, with KTX round-trips and planner coverage.
 - The current image hardening pass added contract tests for unsupported BMP
   compression, DDS fourCC variants, KTX array textures, PVR multi-surface
   inputs, TIFF compression, and TGA color-mapped headers.
@@ -33,15 +35,15 @@
 ## Current repo state
 
 - Active branch: `master`
-- Latest commit on this branch before the final stabilization pass: `d5272dc`
-  (`Merge branch 'text-editorconfig'`)
+- Latest image-family checkpoint: BC4/BC5 plus ETC2/EAC support and matching
+  docs/tests
 - Latest stabilized milestone on `master`: release `0.3.0`
 - Verification status at end of session:
   - `haxe build.hxml` passed
   - `haxe test.hxml` passed
-- Current working tree contains the final stabilization docs/example edits.
-- The current pass is focused on keeping the library feeling finished: examples,
-  one more contract sweep, and release readiness.
+- Current working tree contains the ETC2/EAC texture-family edits.
+- The current pass is focused on keeping the image texture subset explicit and
+  lightweight.
 
 ## Files intentionally changed for the text milestone
 
@@ -77,7 +79,7 @@ When resuming this project in a future Codex session:
 1. Read `.codex/assessment.md`.
 2. Read `.codex/next-steps.md`.
 3. Check `git status --short --branch` to see the current stabilization edits.
-4. Resume from the image example / README / changelog checkpoint, then verify
-   with `haxe build.hxml` and `haxe test.hxml`.
+4. Resume from the image support matrix / texture-planning checkpoint, then
+   verify with `haxe build.hxml` and `haxe test.hxml`.
 5. Decide whether the next step is another image hardening pass, a release
    sweep, or a deliberate pause.

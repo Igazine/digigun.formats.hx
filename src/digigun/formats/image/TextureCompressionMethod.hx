@@ -19,8 +19,17 @@ enum abstract TextureCompressionMethod(String) from String to String {
   /** BC5 / RGTC2 block compression for two-channel textures. */
   var BC5 = "bc5";
 
-  /** ETC2 RGB block compression. */
+  /** ETC2 RGB8 block compression. */
   var ETC2Rgb8 = "etc2-rgb8";
+
+  /** ETC2 RGBA8 block compression with separate alpha. */
+  var ETC2Rgba8 = "etc2-rgba8";
+
+  /** EAC R11 block compression for single-channel textures. */
+  var EacR11 = "eac-r11";
+
+  /** EAC RG11 block compression for two-channel textures. */
+  var EacRg11 = "eac-rg11";
 
   /** ASTC 4x4 RGBA block compression. */
   var Astc4x4Rgba = "astc-4x4-rgba";

@@ -8,6 +8,8 @@
 - Perform only small cleanup changes from here, not new scope.
 - BC4 / BC5 and RG8 are the current image extension checkpoint; any further
   image work should stay within the same lightweight texture-family policy.
+- ETC2 RGBA8 and EAC R11/RG11 are now included in that checkpoint for
+  Khronos/WebGL-style targets.
 
 ## Current branch notes
 

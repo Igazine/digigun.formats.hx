@@ -26,9 +26,15 @@ class TextureFormatSupport {
           || format.id == PixelFormats.BC3_RGBA_UNORM.id
           || format.id == PixelFormats.BC5_RG_UNORM.id
           || format.id == PixelFormats.ETC2_RGB8_UNORM.id
+          || format.id == PixelFormats.ETC2_RGBA8_UNORM.id
+          || format.id == PixelFormats.EAC_R11_UNORM.id
+          || format.id == PixelFormats.EAC_RG11_UNORM.id
           || format.id == PixelFormats.ASTC_4X4_RGBA_UNORM.id;
       case GraphicsApi.WebGL:
         format.id == PixelFormats.ETC2_RGB8_UNORM.id
+          || format.id == PixelFormats.ETC2_RGBA8_UNORM.id
+          || format.id == PixelFormats.EAC_R11_UNORM.id
+          || format.id == PixelFormats.EAC_RG11_UNORM.id
           || format.id == PixelFormats.ASTC_4X4_RGBA_UNORM.id
           || format.id == PixelFormats.BC1_RGB_UNORM.id
           || format.id == PixelFormats.BC3_RGBA_UNORM.id;
@@ -38,6 +44,9 @@ class TextureFormatSupport {
           || format.id == PixelFormats.BC3_RGBA_UNORM.id
           || format.id == PixelFormats.BC5_RG_UNORM.id
           || format.id == PixelFormats.ETC2_RGB8_UNORM.id
+          || format.id == PixelFormats.ETC2_RGBA8_UNORM.id
+          || format.id == PixelFormats.EAC_R11_UNORM.id
+          || format.id == PixelFormats.EAC_RG11_UNORM.id
           || format.id == PixelFormats.ASTC_4X4_RGBA_UNORM.id;
       case GraphicsApi.Metal:
         format.id == PixelFormats.BC1_RGB_UNORM.id
