@@ -312,12 +312,18 @@ class YamlReader implements FormatReader<String, YamlDocument> {
           bracketDepth++;
           current.add(char);
         case "]":
+          if (bracketDepth == 0) {
+            return Failure(error("Unexpected closing bracket in YAML flow collection.", line, index + 1));
+          }
           bracketDepth--;
           current.add(char);
         case "{":
           braceDepth++;
           current.add(char);
         case "}":
+          if (braceDepth == 0) {
+            return Failure(error("Unexpected closing brace in YAML flow collection.", line, index + 1));
+          }
           braceDepth--;
           current.add(char);
         case ",":

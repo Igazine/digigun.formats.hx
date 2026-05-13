@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Tightened TOML and YAML malformed nested delimiter rejection in the flow and
+  inline collection scanners
+- Clarified TOML, YAML, and HCL malformed-collection rejection behavior in the
+  README
+
 - Added EditorConfig parsing, writing, and document helpers as a thin
   specialization over the INI document model
 - Added fixture-backed EditorConfig parse, round-trip, and invalid-input tests

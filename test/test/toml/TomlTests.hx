@@ -20,6 +20,7 @@ class TomlTests {
     testTomlRoundTrip();
     testNestedInlineTables();
     testInvalidTomlInlineTableStructure();
+    testInvalidTomlUnexpectedClosingDelimiter();
     testUnsupportedTomlQuotedKeys();
     testInvalidToml();
     testTomlValueConversions();
@@ -134,6 +135,24 @@ class TomlTests {
         Assertions.assertEquals("invalid toml inline table code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected malformed TOML inline table to fail.");
+    }
+  }
+
+  static function testInvalidTomlUnexpectedClosingDelimiter():Void {
+    var reader = new TomlReader();
+
+    switch (reader.read('metadata = { owner = "digigun" ] }')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid toml unexpected closing bracket code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected unmatched TOML closing bracket to fail.");
+    }
+
+    switch (reader.read("ports = [1, 2 }]")) {
+      case Failure(error):
+        Assertions.assertEquals("invalid toml unexpected closing brace code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected unmatched TOML closing brace to fail.");
     }
   }
 

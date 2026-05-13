@@ -22,6 +22,7 @@ class YamlTests {
     testInvalidYamlTrailingRootContent();
     testInvalidYamlUnterminatedFlowCollection();
     testInvalidYamlMixedFlowAndBlockStructure();
+    testInvalidYamlUnexpectedFlowClosingDelimiter();
     testInvalidYamlUnexpectedSequenceIndentation();
   }
 
@@ -221,6 +222,24 @@ class YamlTests {
         Assertions.assertEquals("invalid yaml unexpected sequence indentation code", FormatErrorCode.InvalidStructure, error.code);
       case Success(_):
         Assertions.fail("Expected unexpectedly indented YAML sequence entry to fail.");
+    }
+  }
+
+  static function testInvalidYamlUnexpectedFlowClosingDelimiter():Void {
+    var reader = new YamlReader();
+
+    switch (reader.read('meta: { owner: digigun ] }')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid yaml unexpected closing bracket code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected unmatched YAML flow closing bracket to fail.");
+    }
+
+    switch (reader.read('meta: [alpha, { owner: digigun } }]')) {
+      case Failure(error):
+        Assertions.assertEquals("invalid yaml unexpected closing brace code", FormatErrorCode.InvalidStructure, error.code);
+      case Success(_):
+        Assertions.fail("Expected unmatched YAML flow closing brace to fail.");
     }
   }
 }

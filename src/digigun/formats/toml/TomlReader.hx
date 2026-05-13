@@ -236,8 +236,8 @@ class TomlReader implements FormatReader<String, TomlDocument> {
           bracketDepth++;
           current.add(char);
         case "]":
-          if (closeChar == "]" && bracketDepth == 0 && braceDepth == 0) {
-            return Failure(error(FormatErrorCode.InvalidStructure, "Unexpected closing bracket in array.", lineNumber, index + 1));
+          if (bracketDepth == 0) {
+            return Failure(error(FormatErrorCode.InvalidStructure, "Unexpected closing bracket in TOML collection literal.", lineNumber, index + 1));
           }
           bracketDepth--;
           current.add(char);
@@ -245,8 +245,8 @@ class TomlReader implements FormatReader<String, TomlDocument> {
           braceDepth++;
           current.add(char);
         case "}":
-          if (closeChar == "}" && braceDepth == 0 && bracketDepth == 0) {
-            return Failure(error(FormatErrorCode.InvalidStructure, "Unexpected closing brace in inline table.", lineNumber, index + 1));
+          if (braceDepth == 0) {
+            return Failure(error(FormatErrorCode.InvalidStructure, "Unexpected closing brace in TOML collection literal.", lineNumber, index + 1));
           }
           braceDepth--;
           current.add(char);

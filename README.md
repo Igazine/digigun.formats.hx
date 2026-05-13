@@ -143,7 +143,8 @@ The built-in TOML codec supports a practical typed subset:
 
 The TOML implementation intentionally does not yet cover every TOML feature,
 such as quoted keys, dotted keys, array-of-tables, dates, and multiline
-strings.
+strings. It also rejects malformed nested array and inline-table delimiters
+instead of trying to recover from them.
 
 ## CSV support
 
@@ -199,7 +200,8 @@ The built-in YAML codec supports a practical block-style subset:
 
 The YAML implementation intentionally does not yet cover anchors, tags,
 multiline strings, arbitrary flow/block mixing beyond the documented subset, or
-the full YAML specification.
+the full YAML specification. It also rejects malformed nested flow delimiters
+instead of trying to recover from them.
 
 ## MessagePack support
 
@@ -242,7 +244,8 @@ The built-in HCL2 codec supports a practical native-syntax subset:
 
 This implementation intentionally does not yet evaluate expressions, templates,
 function calls, traversals, or the full HCL language. It focuses on readable
-and writable configuration structures for literal-only configuration data.
+and writable configuration structures for literal-only configuration data, and
+it rejects malformed nested block and object delimiters.
 
 ## Status
 
