@@ -257,9 +257,9 @@ it rejects malformed nested block and object delimiters.
 
 The image branch focuses on a narrow, pure-Haxe texture subset:
 
-- `DDS`: 2D textures with BC1/BC3 payloads, plus practical 24-bit and 32-bit
+- `DDS`: 2D textures with BC1/BC3/BC4/BC5 payloads, plus practical 24-bit and 32-bit
   uncompressed input/output
-- `KTX`: 2D single-face textures with RGB8/RGBA8 or BC1/BC3 payloads
+- `KTX`: 2D single-face textures with RG8/RGB8/RGBA8 or BC1/BC3/BC4/BC5 payloads
 - `PVR`: 2D single-surface PVRTC1 4bpp RGBA textures
 - `BMP`: uncompressed `BI_RGB` 24-bit and 32-bit input/output
 - `TIFF`: uncompressed, contiguous, 8-bit gray/RGB/RGBA input/output
@@ -267,7 +267,7 @@ The image branch focuses on a narrow, pure-Haxe texture subset:
 - `PPM`/`PGM`: binary `P6`/`P5` input/output
 - `RAW`: explicit byte-layout textures for direct buffer exchange
 
-Texture block formats such as BC1, BC3, ETC2, ASTC, and PVRTC are modeled as
+Texture block formats such as BC1, BC3, BC4, BC5, ETC2, ASTC, and PVRTC are modeled as
 payload targets inside the supported containers. Anything that depends on
 general-purpose compression libraries, such as PNG, stays deferred until the
 separate compression project is ready. This keeps the image branch cross-target
@@ -278,7 +278,7 @@ and stdlib-only.
 | Status | Formats |
 | --- | --- |
 | Supported | DDS, KTX, PVR, BMP, TIFF, TGA, PPM/PGM, RAW |
-| Supported subset | DDS 2D BC1/BC3 and uncompressed 24/32-bit, KTX 2D single-face RGB8/RGBA8/BC1/BC3, PVR 2D single-surface PVRTC1, BMP `BI_RGB`, TIFF uncompressed contiguous 8-bit gray/RGB/RGBA, TGA 8/24/32-bit with optional RLE, PPM/PGM binary `P6`/`P5`, RAW explicit layout |
+| Supported subset | DDS 2D BC1/BC3/BC4/BC5 and uncompressed 24/32-bit, KTX 2D single-face RG8/RGB8/RGBA8/BC1/BC3/BC4/BC5, PVR 2D single-surface PVRTC1, BMP `BI_RGB`, TIFF uncompressed contiguous 8-bit gray/RGB/RGBA, TGA 8/24/32-bit with optional RLE, PPM/PGM binary `P6`/`P5`, RAW explicit layout |
 | Unsupported | TIFF compression, BMP compression, KTX arrays/cubemaps/3D, PVR multi-surface, TGA color-mapped input |
 | Deferred | PNG and any format that depends on general-purpose compression libraries |
 
@@ -286,8 +286,8 @@ and stdlib-only.
 
 This project is currently in early `0.3.x` development. The `0.3.0` release
 captures the stabilized text-format surface, the EditorConfig specialization,
-the text namespace move, and the current image/texture subset while keeping
-format-specific subsets explicit.
+the text namespace move, and the current image/texture subset including BC4/BC5
+and RG8 while keeping format-specific subsets explicit.
 
 ## Compatibility Policy
 

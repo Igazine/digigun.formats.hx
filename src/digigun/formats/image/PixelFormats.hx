@@ -19,6 +19,9 @@ class PixelFormats {
   /** 8-bit normalized BGRA pixels in linear space. */
   public static final BGRA8_UNORM = new PixelFormat("bgra8-unorm", ChannelOrder.BGRA, ChannelType.Unorm8);
 
+  /** 8-bit normalized RG pixels in linear space. */
+  public static final RG8_UNORM = new PixelFormat("rg8-unorm", ChannelOrder.RG, ChannelType.Unorm8);
+
   /** 8-bit normalized RGBA pixels in sRGB space. */
   public static final RGBA8_SRGB = new PixelFormat("rgba8-srgb", ChannelOrder.RGBA, ChannelType.Unorm8, ColorSpace.SRgb);
 
@@ -33,6 +36,12 @@ class PixelFormats {
 
   /** BC3 / DXT5 style compressed RGBA data. */
   public static final BC3_RGBA_UNORM = new PixelFormat("bc3-rgba-unorm", null, null, ColorSpace.Linear, CompressedFormatFamily.BC, 4, 4, 16);
+
+  /** BC4 / RGTC1 style compressed single-channel data. */
+  public static final BC4_R_UNORM = new PixelFormat("bc4-r-unorm", null, null, ColorSpace.Linear, CompressedFormatFamily.BC, 4, 4, 8);
+
+  /** BC5 / RGTC2 style compressed two-channel data. */
+  public static final BC5_RG_UNORM = new PixelFormat("bc5-rg-unorm", null, null, ColorSpace.Linear, CompressedFormatFamily.BC, 4, 4, 16);
 
   /** ETC2 compressed RGB data. */
   public static final ETC2_RGB8_UNORM = new PixelFormat("etc2-rgb8-unorm", null, null, ColorSpace.Linear, CompressedFormatFamily.ETC2, 4, 4, 8);
@@ -58,6 +67,8 @@ class PixelFormats {
         RGBA8_UNORM;
       case "bgra8-unorm":
         BGRA8_UNORM;
+      case "rg8-unorm":
+        RG8_UNORM;
       case "rgba8-srgb":
         RGBA8_SRGB;
       case "rgba16-float":
@@ -68,6 +79,10 @@ class PixelFormats {
         BC1_RGB_UNORM;
       case "bc3-rgba-unorm":
         BC3_RGBA_UNORM;
+      case "bc4-r-unorm":
+        BC4_R_UNORM;
+      case "bc5-rg-unorm":
+        BC5_RG_UNORM;
       case "etc2-rgb8-unorm":
         ETC2_RGB8_UNORM;
       case "astc-4x4-rgba-unorm":

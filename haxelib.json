@@ -28,13 +28,17 @@
     "bmp",
     "tiff",
     "ppm",
+    "rg8",
+    "bc4",
+    "bc5",
+    "rgtc",
     "raw",
     "cross"
   ],
   "description": "Pure-Haxe, cross-platform readers and writers for config, data, and texture formats.",
   "version": "0.3.0",
   "classPath": "src",
-  "releasenote": "Text formats live under digigun.formats.text.<format>, EditorConfig is supported as a thin INI specialization, and the image branch covers DDS, KTX, PVR, BMP, TIFF, TGA, PPM/PGM, RAW, and simple TGA RLE.",
+  "releasenote": "Text formats live under digigun.formats.text.<format>, EditorConfig is supported as a thin INI specialization, and the image branch covers DDS, KTX, PVR, BMP, TIFF, TGA, PPM/PGM, RAW, simple TGA RLE, plus BC4/BC5 and RG8 texture support.",
   "contributors": [
     "Igazine"
   ]

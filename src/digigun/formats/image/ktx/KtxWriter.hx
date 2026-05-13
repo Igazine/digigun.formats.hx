@@ -63,6 +63,8 @@ class KtxWriter implements FormatWriter<TextureData, Bytes> {
 
   function resolveFormat(format:PixelFormat):Null<KtxWriteFormatInfo> {
     return switch (format.id) {
+      case "rg8-unorm":
+        new KtxWriteFormatInfo(0x1401, 1, 0x8227, 0x822b, 0x8227);
       case "rgb8-unorm":
         new KtxWriteFormatInfo(0x1401, 1, 0x1907, 0x8051, 0x1907);
       case "rgba8-unorm":
@@ -71,6 +73,10 @@ class KtxWriter implements FormatWriter<TextureData, Bytes> {
         new KtxWriteFormatInfo(0, 1, 0, 0x83f0, 0x1907);
       case "bc3-rgba-unorm":
         new KtxWriteFormatInfo(0, 1, 0, 0x83f3, 0x1908);
+      case "bc4-r-unorm":
+        new KtxWriteFormatInfo(0, 1, 0, 0x8dbb, 0x1903);
+      case "bc5-rg-unorm":
+        new KtxWriteFormatInfo(0, 1, 0, 0x8dbd, 0x8227);
       default:
         null;
     };

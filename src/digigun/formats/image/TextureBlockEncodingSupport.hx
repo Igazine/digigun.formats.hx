@@ -17,6 +17,10 @@ class TextureBlockEncodingSupport {
         new Bc1TextureBlockEncoder();
       case TextureCompressionMethod.BC3:
         new Bc3TextureBlockEncoder();
+      case TextureCompressionMethod.BC4:
+        new Bc4TextureBlockEncoder();
+      case TextureCompressionMethod.BC5:
+        new Bc5TextureBlockEncoder();
       case TextureCompressionMethod.ETC2Rgb8:
         new Etc2Rgb8TextureBlockEncoder();
       case TextureCompressionMethod.Astc4x4Rgba:

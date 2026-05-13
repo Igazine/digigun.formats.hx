@@ -78,11 +78,19 @@ class DdsReader implements FormatReader<Bytes, TextureData> {
     if ((flags & DDPF_FOURCC) != 0) {
       var dxt1 = BinaryTools.fourCC("DXT1");
       var dxt5 = BinaryTools.fourCC("DXT5");
+      var ati1 = BinaryTools.fourCC("ATI1");
+      var ati2 = BinaryTools.fourCC("ATI2");
       if (fourCC == dxt1) {
         return PixelFormats.BC1_RGB_UNORM;
       }
       if (fourCC == dxt5) {
         return PixelFormats.BC3_RGBA_UNORM;
+      }
+      if (fourCC == ati1) {
+        return PixelFormats.BC4_R_UNORM;
+      }
+      if (fourCC == ati2) {
+        return PixelFormats.BC5_RG_UNORM;
       }
       return null;
     }

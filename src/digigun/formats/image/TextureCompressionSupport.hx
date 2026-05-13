@@ -13,6 +13,10 @@ class TextureCompressionSupport {
         new TextureCompressionInfo(TextureCompressionMethod.BC1, PixelFormats.BC1_RGB_UNORM, 4, 4, 8, "BC1 / DXT1 block compression for opaque RGB textures.");
       case "bc3-rgba-unorm":
         new TextureCompressionInfo(TextureCompressionMethod.BC3, PixelFormats.BC3_RGBA_UNORM, 4, 4, 16, "BC3 / DXT5 block compression with alpha support.");
+      case "bc4-r-unorm":
+        new TextureCompressionInfo(TextureCompressionMethod.BC4, PixelFormats.BC4_R_UNORM, 4, 4, 8, "BC4 / RGTC1 block compression for single-channel textures and masks.");
+      case "bc5-rg-unorm":
+        new TextureCompressionInfo(TextureCompressionMethod.BC5, PixelFormats.BC5_RG_UNORM, 4, 4, 16, "BC5 / RGTC2 block compression for dual-channel textures and normal maps.");
       case "etc2-rgb8-unorm":
         new TextureCompressionInfo(TextureCompressionMethod.ETC2Rgb8, PixelFormats.ETC2_RGB8_UNORM, 4, 4, 8, "ETC2 RGB block compression, especially relevant for OpenGL ES and WebGL 2.");
       case "astc-4x4-rgba-unorm":
@@ -33,6 +37,10 @@ class TextureCompressionSupport {
         PixelFormats.BC1_RGB_UNORM;
       case TextureCompressionMethod.BC3:
         PixelFormats.BC3_RGBA_UNORM;
+      case TextureCompressionMethod.BC4:
+        PixelFormats.BC4_R_UNORM;
+      case TextureCompressionMethod.BC5:
+        PixelFormats.BC5_RG_UNORM;
       case TextureCompressionMethod.ETC2Rgb8:
         PixelFormats.ETC2_RGB8_UNORM;
       case TextureCompressionMethod.Astc4x4Rgba:
@@ -54,10 +62,13 @@ class TextureCompressionSupport {
       case TextureContainerFormat.Raw:
         new TextureContainerProfile(container, true, true, [
           PixelFormats.R8_UNORM.id,
+          PixelFormats.RG8_UNORM.id,
           PixelFormats.RGB8_UNORM.id,
           PixelFormats.RGBA8_UNORM.id,
           PixelFormats.BC1_RGB_UNORM.id,
           PixelFormats.BC3_RGBA_UNORM.id,
+          PixelFormats.BC4_R_UNORM.id,
+          PixelFormats.BC5_RG_UNORM.id,
           PixelFormats.ETC2_RGB8_UNORM.id,
           PixelFormats.ASTC_4X4_RGBA_UNORM.id,
           PixelFormats.PVRTC1_4_RGBA_UNORM.id
@@ -67,14 +78,19 @@ class TextureCompressionSupport {
           PixelFormats.BGR8_UNORM.id,
           PixelFormats.BGRA8_UNORM.id,
           PixelFormats.BC1_RGB_UNORM.id,
-          PixelFormats.BC3_RGBA_UNORM.id
+          PixelFormats.BC3_RGBA_UNORM.id,
+          PixelFormats.BC4_R_UNORM.id,
+          PixelFormats.BC5_RG_UNORM.id
         ]);
       case TextureContainerFormat.Ktx:
         new TextureContainerProfile(container, true, true, [
+          PixelFormats.RG8_UNORM.id,
           PixelFormats.RGB8_UNORM.id,
           PixelFormats.RGBA8_UNORM.id,
           PixelFormats.BC1_RGB_UNORM.id,
           PixelFormats.BC3_RGBA_UNORM.id,
+          PixelFormats.BC4_R_UNORM.id,
+          PixelFormats.BC5_RG_UNORM.id,
           PixelFormats.ETC2_RGB8_UNORM.id,
           PixelFormats.ASTC_4X4_RGBA_UNORM.id
         ]);
@@ -126,13 +142,21 @@ class TextureCompressionSupport {
 
   static function chooseCompressedFormat(request:TextureEncodingRequest, container:TextureContainerFormat, baseline:PixelFormat):Null<PixelFormat> {
     var sourceHasAlpha = request.source.format.channelOrder != null && request.source.format.channelOrder.hasAlpha();
+    var sourceOrder = request.source.format.channelOrder;
+    var preferSingleChannel = sourceOrder == ChannelOrder.R;
+    var preferDualChannel = sourceOrder == ChannelOrder.RG;
     var profile = containerProfile(container);
     var candidates = candidateFormatsForApi(request.api, request.requireAlpha || sourceHasAlpha);
-    if (!request.requireAlpha && !sourceHasAlpha) {
+    if (!request.requireAlpha && preferSingleChannel) {
+      reorderCandidate(candidates, PixelFormats.BC4_R_UNORM);
+    } else if (!request.requireAlpha && preferDualChannel) {
+      reorderCandidate(candidates, PixelFormats.BC5_RG_UNORM);
+    }
+    if (!request.requireAlpha && !sourceHasAlpha && !preferSingleChannel && !preferDualChannel) {
       if (candidates.indexOf(PixelFormats.BC1_RGB_UNORM) < 0) {
         candidates.unshift(PixelFormats.BC1_RGB_UNORM);
       }
-    } else if (baseline.id == PixelFormats.BC3_RGBA_UNORM.id && candidates.indexOf(PixelFormats.BC3_RGBA_UNORM) < 0) {
+    } else if ((request.requireAlpha || sourceHasAlpha) && baseline.id == PixelFormats.BC3_RGBA_UNORM.id && candidates.indexOf(PixelFormats.BC3_RGBA_UNORM) < 0) {
       candidates.unshift(PixelFormats.BC3_RGBA_UNORM);
     }
 
@@ -149,9 +173,21 @@ class TextureCompressionSupport {
     return null;
   }
 
+  static function reorderCandidate(candidates:Array<PixelFormat>, preferred:PixelFormat):Void {
+    var index = candidates.indexOf(preferred);
+    if (index >= 0) {
+      candidates.splice(index, 1);
+    }
+    candidates.unshift(preferred);
+  }
+
   static function chooseUncompressedFallback(sourceFormat:PixelFormat):PixelFormat {
     if (sourceFormat.channelOrder == ChannelOrder.R) {
       return PixelFormats.R8_UNORM;
+    }
+
+    if (sourceFormat.channelOrder == ChannelOrder.RG) {
+      return PixelFormats.RG8_UNORM;
     }
 
     if (sourceFormat.channelOrder != null && sourceFormat.channelOrder.hasAlpha()) {
@@ -166,7 +202,7 @@ class TextureCompressionSupport {
       case GraphicsApi.OpenGL:
         needAlpha
           ? [PixelFormats.BC3_RGBA_UNORM, PixelFormats.ASTC_4X4_RGBA_UNORM]
-          : [PixelFormats.BC1_RGB_UNORM, PixelFormats.ETC2_RGB8_UNORM];
+          : [PixelFormats.BC1_RGB_UNORM, PixelFormats.BC4_R_UNORM, PixelFormats.ETC2_RGB8_UNORM];
       case GraphicsApi.WebGL:
         needAlpha
           ? [PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.BC3_RGBA_UNORM]
@@ -174,7 +210,7 @@ class TextureCompressionSupport {
       case GraphicsApi.Vulkan:
         needAlpha
           ? [PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.BC3_RGBA_UNORM]
-          : [PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.ETC2_RGB8_UNORM, PixelFormats.BC1_RGB_UNORM];
+          : [PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.ETC2_RGB8_UNORM, PixelFormats.BC5_RG_UNORM, PixelFormats.BC1_RGB_UNORM];
       case GraphicsApi.Metal:
         needAlpha
           ? [PixelFormats.ASTC_4X4_RGBA_UNORM, PixelFormats.PVRTC1_4_RGBA_UNORM, PixelFormats.BC3_RGBA_UNORM]
@@ -182,7 +218,7 @@ class TextureCompressionSupport {
       case GraphicsApi.Direct3D11:
         needAlpha
           ? [PixelFormats.BC3_RGBA_UNORM]
-          : [PixelFormats.BC1_RGB_UNORM];
+          : [PixelFormats.BC1_RGB_UNORM, PixelFormats.BC4_R_UNORM, PixelFormats.BC5_RG_UNORM];
       default:
         [];
     };

@@ -6,6 +6,8 @@
   iterating with small metadata/docs cleanup only.
 - Keep the current image subset explicit in docs and tests.
 - Perform only small cleanup changes from here, not new scope.
+- BC4 / BC5 and RG8 are the current image extension checkpoint; any further
+  image work should stay within the same lightweight texture-family policy.
 
 ## Current branch notes
 
@@ -26,5 +28,7 @@
 - General-purpose compression-dependent image formats, especially PNG
 - Any image codec work that would require external compression libraries
 - Broadening the image branch beyond the current GPU/container-oriented subset
+- Large new image families until the BC4 / BC5 hardening pass is considered
+  stable
 - JSON5 remains a low-priority future consideration only if a concrete use case
   emerges

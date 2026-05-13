@@ -14,7 +14,10 @@ import test.Assertions;
 class KtxTests {
   public static function run():Void {
     testKtxRgbaRoundTrip();
+    testKtxRgRoundTrip();
     testKtxCompressedRoundTrip();
+    testKtxBc4RoundTrip();
+    testKtxBc5RoundTrip();
     testKtxMipChainRoundTrip();
     testKtxUnsupportedArrayTexture();
     testInvalidKtx();
@@ -37,6 +40,23 @@ class KtxTests {
     }
   }
 
+  static function testKtxRgRoundTrip():Void {
+    var texture = TextureData.fromBytes2D(new ImageSize(1, 1), PixelFormats.RG8_UNORM, Bytes.ofHex("1122"));
+    var codec = new KtxCodec();
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        switch (codec.read(encoded)) {
+          case Success(parsed):
+            Assertions.assertEquals("ktx rg format", PixelFormats.RG8_UNORM.id, parsed.format.id);
+            Assertions.assertEquals("ktx rg bytes", "1122", parsed.getPrimaryMipLevel().data.toHex());
+          case Failure(error):
+            Assertions.fail('Expected KTX RG parse to succeed: ${error.toString()}');
+        }
+      case Failure(error):
+        Assertions.fail('Expected KTX RG write to succeed: ${error.toString()}');
+    }
+  }
+
   static function testKtxCompressedRoundTrip():Void {
     var texture = new TextureData(TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.BC3_RGBA_UNORM);
     texture.getOrCreatePrimarySurface().setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("00112233445566778899aabbccddeeff"))));
@@ -52,6 +72,42 @@ class KtxTests {
         }
       case Failure(error):
         Assertions.fail('Expected KTX compressed write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testKtxBc4RoundTrip():Void {
+    var texture = new TextureData(TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.BC4_R_UNORM);
+    texture.getOrCreatePrimarySurface().setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("fffe000000000000"))));
+    var codec = new KtxCodec();
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        switch (codec.read(encoded)) {
+          case Success(parsed):
+            Assertions.assertEquals("ktx bc4 format", PixelFormats.BC4_R_UNORM.id, parsed.format.id);
+            Assertions.assertEquals("ktx bc4 bytes", "fffe000000000000", parsed.getPrimaryMipLevel().data.toHex());
+          case Failure(error):
+            Assertions.fail('Expected KTX BC4 parse to succeed: ${error.toString()}');
+        }
+      case Failure(error):
+        Assertions.fail('Expected KTX BC4 write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testKtxBc5RoundTrip():Void {
+    var texture = new TextureData(TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.BC5_RG_UNORM);
+    texture.getOrCreatePrimarySurface().setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("fffe000000000000fffe000000000000"))));
+    var codec = new KtxCodec();
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        switch (codec.read(encoded)) {
+          case Success(parsed):
+            Assertions.assertEquals("ktx bc5 format", PixelFormats.BC5_RG_UNORM.id, parsed.format.id);
+            Assertions.assertEquals("ktx bc5 bytes", "fffe000000000000fffe000000000000", parsed.getPrimaryMipLevel().data.toHex());
+          case Failure(error):
+            Assertions.fail('Expected KTX BC5 parse to succeed: ${error.toString()}');
+        }
+      case Failure(error):
+        Assertions.fail('Expected KTX BC5 write to succeed: ${error.toString()}');
     }
   }
 

@@ -3,7 +3,9 @@ package test.image;
 import digigun.formats.FormatErrorCode;
 import digigun.formats.image.Astc4x4RgbaTextureBlockEncoder;
 import digigun.formats.image.Bc1TextureBlockEncoder;
+import digigun.formats.image.Bc4TextureBlockEncoder;
 import digigun.formats.image.Bc3TextureBlockEncoder;
+import digigun.formats.image.Bc5TextureBlockEncoder;
 import digigun.formats.image.ByteBuffer;
 import digigun.formats.image.Etc2Rgb8TextureBlockEncoder;
 import digigun.formats.image.ImageSize;
@@ -25,6 +27,8 @@ class TextureBlockEncodingTests {
     testCompressedPassthrough();
     testRealBc1Encoding();
     testRealBc3Encoding();
+    testRealBc4Encoding();
+    testRealBc5Encoding();
     testRealEtc2Encoding();
     testPlannedEncodeDispatch();
   }
@@ -36,6 +40,8 @@ class TextureBlockEncodingTests {
     Assertions.assertTrue("astc encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.Astc4x4Rgba), Astc4x4RgbaTextureBlockEncoder));
     Assertions.assertTrue("bc1 encoder type", Std.isOfType(encoder, Bc1TextureBlockEncoder));
     Assertions.assertTrue("bc3 encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.BC3), Bc3TextureBlockEncoder));
+    Assertions.assertTrue("bc4 encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.BC4), Bc4TextureBlockEncoder));
+    Assertions.assertTrue("bc5 encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.BC5), Bc5TextureBlockEncoder));
     Assertions.assertTrue("etc2 encoder type", Std.isOfType(TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.ETC2Rgb8), Etc2Rgb8TextureBlockEncoder));
   }
 
@@ -96,6 +102,44 @@ class TextureBlockEncodingTests {
     }
   }
 
+  static function testRealBc4Encoding():Void {
+    var source = Bytes.alloc(4 * 4);
+    for (pixel in 0...16) {
+      source.set(pixel, 0xff);
+    }
+    var texture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.R8_UNORM, source);
+    var encoder = TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.BC4);
+    switch (encoder.encode(texture, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertTrue("bc4 real encode not passthrough", !result.wasPassthrough);
+        Assertions.assertEquals("bc4 encoded format", PixelFormats.BC4_R_UNORM.id, result.texture.format.id);
+        Assertions.assertEquals("bc4 encoded byte length", 8, result.texture.getPrimaryMipLevel().data.length);
+        Assertions.assertEquals("bc4 encoded bytes", "fffe000000000000", result.texture.getPrimaryMipLevel().data.toHex());
+      case Failure(error):
+        Assertions.fail('Expected real BC4 encoding to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testRealBc5Encoding():Void {
+    var source = Bytes.alloc(4 * 4 * 2);
+    for (pixel in 0...16) {
+      var offset = pixel * 2;
+      source.set(offset, 0xff);
+      source.set(offset + 1, 0xff);
+    }
+    var texture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.RG8_UNORM, source);
+    var encoder = TextureBlockEncodingSupport.createEncoder(TextureCompressionMethod.BC5);
+    switch (encoder.encode(texture, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertTrue("bc5 real encode not passthrough", !result.wasPassthrough);
+        Assertions.assertEquals("bc5 encoded format", PixelFormats.BC5_RG_UNORM.id, result.texture.format.id);
+        Assertions.assertEquals("bc5 encoded byte length", 16, result.texture.getPrimaryMipLevel().data.length);
+        Assertions.assertEquals("bc5 encoded bytes", "fffe000000000000fffe000000000000", result.texture.getPrimaryMipLevel().data.toHex());
+      case Failure(error):
+        Assertions.fail('Expected real BC5 encoding to succeed: ${error.toString()}');
+    }
+  }
+
   static function testRealEtc2Encoding():Void {
     var source = Bytes.alloc(4 * 4 * 3);
     for (pixel in 0...16) {
@@ -137,6 +181,26 @@ class TextureBlockEncodingTests {
         Assertions.assertEquals("planned bc1 dispatch format", PixelFormats.BC1_RGB_UNORM.id, result.texture.format.id);
       case Failure(error):
         Assertions.fail('Expected planned BC1 dispatch to succeed: ${error.toString()}');
+    }
+
+    var rTexture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.R8_UNORM, Bytes.alloc(16));
+    var rRequest = new TextureEncodingRequest(digigun.formats.image.GraphicsApi.Direct3D11, rTexture, false, false, false, TextureContainerFormat.Dds);
+    switch (TextureBlockEncodingSupport.encode(rRequest, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertEquals("planned bc4 dispatch method", TextureCompressionMethod.BC4, result.method);
+        Assertions.assertEquals("planned bc4 dispatch format", PixelFormats.BC4_R_UNORM.id, result.texture.format.id);
+      case Failure(error):
+        Assertions.fail('Expected planned BC4 encode dispatch to succeed: ${error.toString()}');
+    }
+
+    var rgTexture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.RG8_UNORM, Bytes.alloc(32));
+    var rgRequest = new TextureEncodingRequest(digigun.formats.image.GraphicsApi.Direct3D11, rgTexture, false, false, false, TextureContainerFormat.Dds);
+    switch (TextureBlockEncodingSupport.encode(rgRequest, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertEquals("planned bc5 dispatch method", TextureCompressionMethod.BC5, result.method);
+        Assertions.assertEquals("planned bc5 dispatch format", PixelFormats.BC5_RG_UNORM.id, result.texture.format.id);
+      case Failure(error):
+        Assertions.fail('Expected planned BC5 encode dispatch to succeed: ${error.toString()}');
     }
 
     var rgbaTexture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.RGBA8_UNORM, Bytes.alloc(64));

@@ -10,11 +10,15 @@
   `text-editorconfig` branch remains as a historical branch checkpoint.
 - The current active work has shifted back to the image subtree on the same
   branch, with the branch policy limited to GPU-oriented texture containers,
-  simple uncompressed baselines, and simple RLE where appropriate.
+  simple uncompressed baselines, simple RLE where appropriate, and lightweight
+  block compression families such as BC4/BC5.
 - The image checkpoint now includes DDS, KTX, PVR, BMP, TIFF, TGA, PPM/PGM,
   RAW, texture block metadata, test wiring, fixtures, and updated docs.
 - TGA RLE support is implemented as a simple pure-Haxe low-complexity texture
   path, matching the "allow simple RLE" rule.
+- BC4 / BC5 texture compression support is wired through the pixel model,
+  block encoders, DDS/KTX containers, planning helpers, and tests. RG8 is the
+  current uncompressed two-channel baseline.
 - The current image hardening pass added contract tests for unsupported BMP
   compression, DDS fourCC variants, KTX array textures, PVR multi-surface
   inputs, TIFF compression, and TGA color-mapped headers.
@@ -75,5 +79,5 @@ When resuming this project in a future Codex session:
 3. Check `git status --short --branch` to see the current stabilization edits.
 4. Resume from the image example / README / changelog checkpoint, then verify
    with `haxe build.hxml` and `haxe test.hxml`.
-5. Decide whether the next step is tagging a release or another small cleanup
-   pass.
+5. Decide whether the next step is another image hardening pass, a release
+   sweep, or a deliberate pause.

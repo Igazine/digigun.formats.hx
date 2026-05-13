@@ -135,6 +135,10 @@ class DdsWriter implements FormatWriter<TextureData, Bytes> {
         new DdsWriteFormatInfo(true, DDPF_FOURCC, BinaryTools.fourCC("DXT1"), 0, 0, 0, 0, 0, 0);
       case "bc3-rgba-unorm":
         new DdsWriteFormatInfo(true, DDPF_FOURCC, BinaryTools.fourCC("DXT5"), 0, 0, 0, 0, 0, 0);
+      case "bc4-r-unorm":
+        new DdsWriteFormatInfo(true, DDPF_FOURCC, BinaryTools.fourCC("ATI1"), 0, 0, 0, 0, 0, 0);
+      case "bc5-rg-unorm":
+        new DdsWriteFormatInfo(true, DDPF_FOURCC, BinaryTools.fourCC("ATI2"), 0, 0, 0, 0, 0, 0);
       case "bgr8-unorm", "rgb8-unorm":
         new DdsWriteFormatInfo(false, DDPF_RGB, 0, 24, 0x00ff0000, 0x0000ff00, 0x000000ff, 0, 3);
       case "bgra8-unorm", "rgba8-unorm":

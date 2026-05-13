@@ -14,6 +14,8 @@ class DdsTests {
   public static function run():Void {
     testDdsBgraRoundTrip();
     testDdsCompressedRoundTrip();
+    testDdsBc4RoundTrip();
+    testDdsBc5RoundTrip();
     testDdsMipChainRoundTrip();
     testDdsUnsupportedFourCc();
     testInvalidDds();
@@ -55,6 +57,46 @@ class DdsTests {
         }
       case Failure(error):
         Assertions.fail('Expected DDS compressed write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testDdsBc4RoundTrip():Void {
+    var texture = new TextureData(digigun.formats.image.TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.BC4_R_UNORM);
+    var surface = texture.getOrCreatePrimarySurface();
+    surface.setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("fffe000000000000"))));
+    var codec = new DdsCodec();
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        switch (codec.read(encoded)) {
+          case Success(parsed):
+            Assertions.assertEquals("dds bc4 format", PixelFormats.BC4_R_UNORM.id, parsed.format.id);
+            Assertions.assertEquals("dds bc4 bytes", "fffe000000000000", parsed.getPrimaryMipLevel().data.toHex());
+          case Failure(error):
+            Assertions.fail('Expected DDS BC4 round trip parse to succeed: ${error.toString()}');
+        }
+      case Failure(error):
+        Assertions.fail('Expected DDS BC4 write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testDdsBc5RoundTrip():Void {
+    var texture = new TextureData(digigun.formats.image.TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.BC5_RG_UNORM);
+    var surface = texture.getOrCreatePrimarySurface();
+    surface.setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("fffe000000000000fffe000000000000"))));
+    var codec = new DdsCodec();
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        switch (codec.read(encoded)) {
+          case Success(parsed):
+            Assertions.assertEquals("dds bc5 format", PixelFormats.BC5_RG_UNORM.id, parsed.format.id);
+            Assertions.assertEquals("dds bc5 bytes", "fffe000000000000fffe000000000000", parsed.getPrimaryMipLevel().data.toHex());
+          case Failure(error):
+            Assertions.fail('Expected DDS BC5 round trip parse to succeed: ${error.toString()}');
+        }
+      case Failure(error):
+        Assertions.fail('Expected DDS BC5 write to succeed: ${error.toString()}');
     }
   }
 

@@ -22,7 +22,9 @@ class TextureFormatSupport {
     return switch (api) {
       case GraphicsApi.OpenGL:
         format.id == PixelFormats.BC1_RGB_UNORM.id
+          || format.id == PixelFormats.BC4_R_UNORM.id
           || format.id == PixelFormats.BC3_RGBA_UNORM.id
+          || format.id == PixelFormats.BC5_RG_UNORM.id
           || format.id == PixelFormats.ETC2_RGB8_UNORM.id
           || format.id == PixelFormats.ASTC_4X4_RGBA_UNORM.id;
       case GraphicsApi.WebGL:
@@ -32,7 +34,9 @@ class TextureFormatSupport {
           || format.id == PixelFormats.BC3_RGBA_UNORM.id;
       case GraphicsApi.Vulkan:
         format.id == PixelFormats.BC1_RGB_UNORM.id
+          || format.id == PixelFormats.BC4_R_UNORM.id
           || format.id == PixelFormats.BC3_RGBA_UNORM.id
+          || format.id == PixelFormats.BC5_RG_UNORM.id
           || format.id == PixelFormats.ETC2_RGB8_UNORM.id
           || format.id == PixelFormats.ASTC_4X4_RGBA_UNORM.id;
       case GraphicsApi.Metal:
@@ -42,7 +46,9 @@ class TextureFormatSupport {
           || format.id == PixelFormats.PVRTC1_4_RGBA_UNORM.id;
       case GraphicsApi.Direct3D11:
         format.id == PixelFormats.BC1_RGB_UNORM.id
-          || format.id == PixelFormats.BC3_RGBA_UNORM.id;
+          || format.id == PixelFormats.BC3_RGBA_UNORM.id
+          || format.id == PixelFormats.BC4_R_UNORM.id
+          || format.id == PixelFormats.BC5_RG_UNORM.id;
       default:
         false;
     };
@@ -71,6 +77,7 @@ class TextureFormatSupport {
 
   static function isCommonUncompressed(format:PixelFormat):Bool {
     return format.id == PixelFormats.R8_UNORM.id
+      || format.id == PixelFormats.RG8_UNORM.id
       || format.id == PixelFormats.RGB8_UNORM.id
       || format.id == PixelFormats.BGR8_UNORM.id
       || format.id == PixelFormats.RGBA8_UNORM.id

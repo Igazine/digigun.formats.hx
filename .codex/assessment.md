@@ -49,6 +49,8 @@
 - TGA RLE is allowed because it is simple, local to the format, and does not
   force an external codec dependency.
 - TIFF is kept as an uncompressed baseline only.
+- BC4 / BC5 and RG8 are now part of the practical texture checkpoint as a
+  lightweight extension to the GPU-oriented image branch.
 - The public README now lists the supported subset per format.
 - A canonical image example now demonstrates `TextureData`, `TgaCodec`, and
   compression planning in one place.
@@ -92,6 +94,8 @@
 - The current active branch is `master`, with the image branch fully merged
   and the latest work checkpoint focused on stabilization docs/examples.
 - The text-format packages now live under `digigun.formats.text.<format>`.
+- The current image extension checkpoint now includes BC4 / BC5 block formats,
+  RG8 uncompressed support, and DDS/KTX container wiring for those payloads.
 - After `0.3.0`, text hardening continued on dedicated branches:
   - `text-hardening/toml-yaml-hcl`
   - `text-hardening/msgpack-ndjson-csv`

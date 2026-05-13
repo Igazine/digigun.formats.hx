@@ -83,6 +83,8 @@ class KtxReader implements FormatReader<Bytes, TextureData> {
 
   function resolveFormat(glType:Int, glFormat:Int, glInternalFormat:Int):Null<PixelFormat> {
     return switch (glInternalFormat) {
+      case 0x822b if (glType == 0x1401 && glFormat == 0x8227):
+        PixelFormats.RG8_UNORM;
       case 0x8051 if (glType == 0x1401 && glFormat == 0x1907):
         PixelFormats.RGB8_UNORM;
       case 0x8058 if (glType == 0x1401 && glFormat == 0x1908):
@@ -91,6 +93,10 @@ class KtxReader implements FormatReader<Bytes, TextureData> {
         PixelFormats.BC1_RGB_UNORM;
       case 0x83f3 if (glType == 0 && glFormat == 0):
         PixelFormats.BC3_RGBA_UNORM;
+      case 0x8dbb if (glType == 0 && glFormat == 0):
+        PixelFormats.BC4_R_UNORM;
+      case 0x8dbd if (glType == 0 && glFormat == 0):
+        PixelFormats.BC5_RG_UNORM;
       default:
         null;
     };

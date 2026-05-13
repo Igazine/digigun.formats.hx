@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added BC4 / BC5 texture compression support plus RG8 container and upload
+  handling across the texture pipeline
+- Added BC4 and BC5 encoder coverage, KTX and DDS round-trips, and planning
+  tests for single-channel and dual-channel texture sources
 - Bumped the package metadata version to `0.3.0` and refreshed the release
   wording for the current text-plus-image scope
 - Refreshed `haxelib.json` to advertise the current text and texture format
