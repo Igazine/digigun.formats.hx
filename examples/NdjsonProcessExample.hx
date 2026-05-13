@@ -1,5 +1,5 @@
 import digigun.formats.FormatResult;
-import digigun.formats.ndjson.NdjsonCodec;
+import digigun.formats.text.ndjson.NdjsonCodec;
 
 class NdjsonProcessExample {
   static function main() {

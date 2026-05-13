@@ -1,5 +1,5 @@
 import digigun.formats.FormatResult;
-import digigun.formats.ini.IniCodec;
+import digigun.formats.text.ini.IniCodec;
 
 class IniEditExample {
   static function main() {

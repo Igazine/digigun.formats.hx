@@ -1,14 +1,14 @@
 import test.core.CoreTests;
-import test.editorconfig.EditorConfigTests;
-import test.csv.CsvTests;
-import test.env.EnvTests;
-import test.hcl.HclTests;
-import test.ini.IniTests;
-import test.msgpack.MessagePackTests;
-import test.ndjson.NdjsonTests;
-import test.properties.PropertiesTests;
-import test.toml.TomlTests;
-import test.yaml.YamlTests;
+import test.text.editorconfig.EditorConfigTests;
+import test.text.csv.CsvTests;
+import test.text.env.EnvTests;
+import test.text.hcl.HclTests;
+import test.text.ini.IniTests;
+import test.text.msgpack.MessagePackTests;
+import test.text.ndjson.NdjsonTests;
+import test.text.properties.PropertiesTests;
+import test.text.toml.TomlTests;
+import test.text.yaml.YamlTests;
 
 class TestMain {
   static function main() {

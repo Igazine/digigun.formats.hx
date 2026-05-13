@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Moved all text formats under `digigun.formats.text.<format>` while keeping
+  each format’s internal structure intact
+- Relocated text fixtures and tests under `test/fixtures/text/` and
+  `test/test/text/`
 - Tightened TOML and YAML malformed nested delimiter rejection in the flow and
   inline collection scanners
 - Clarified TOML, YAML, and HCL malformed-collection rejection behavior in the

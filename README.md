@@ -8,6 +8,8 @@ EditorConfig, TOML, CSV, `.properties`, `.env`, YAML, MessagePack, NDJSON, and
 HCL2 implementations. It is designed for direct class usage rather than a
 global registry, keeping extension points simple and type-safe.
 
+Text formats live under `digigun.formats.text.<format>`.
+
 ## Features
 
 - Pure Haxe, stdlib-only implementation
@@ -52,9 +54,9 @@ Small end-to-end examples live under `examples/`:
 
 ```haxe
 import digigun.formats.FormatResult;
-import digigun.formats.ini.IniDocument;
-import digigun.formats.ini.IniReader;
-import digigun.formats.ini.IniWriter;
+import digigun.formats.text.ini.IniDocument;
+import digigun.formats.text.ini.IniReader;
+import digigun.formats.text.ini.IniWriter;
 
 class Example {
   static function main() {
@@ -76,8 +78,8 @@ Format values also support implicit conversion from regular Haxe literals, so
 you can write code like:
 
 ```haxe
-var iniEnabled = new digigun.formats.ini.IniProperty("enabled", true);
-var tomlPorts = new digigun.formats.toml.TomlProperty("ports", [80, 443]);
+var iniEnabled = new digigun.formats.text.ini.IniProperty("enabled", true);
+var tomlPorts = new digigun.formats.text.toml.TomlProperty("ports", [80, 443]);
 ```
 
 ## Extending with your own format

@@ -5,8 +5,8 @@ import digigun.formats.FormatError;
 import digigun.formats.FormatErrorCode;
 import digigun.formats.FormatLocation;
 import digigun.formats.FormatResult;
-import digigun.formats.ini.IniCodec;
-import digigun.formats.ini.IniDocument;
+import digigun.formats.text.ini.IniCodec;
+import digigun.formats.text.ini.IniDocument;
 import test.Assertions;
 
 class CoreTests {
