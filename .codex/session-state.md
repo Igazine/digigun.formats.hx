@@ -23,14 +23,15 @@
 - A canonical image round-trip example now lives in `examples/` and shows
   `TextureData`, `TgaCodec`, and compression-planning lookup in one place.
 - `haxelib.json` now advertises the image and texture scope alongside the text
-  formats, and the repository URL matches the current GitHub location.
+  formats, the package version is `0.3.0`, and the repository URL matches the
+  current GitHub location.
 
 ## Current repo state
 
 - Active branch: `master`
 - Latest commit on this branch before the final stabilization pass: `d5272dc`
   (`Merge branch 'text-editorconfig'`)
-- Latest stabilized milestone on `master`: tag `v0.2.0` at commit `572a54f`
+- Latest stabilized milestone on `master`: release `0.3.0`
 - Verification status at end of session:
   - `haxe build.hxml` passed
   - `haxe test.hxml` passed
@@ -59,7 +60,7 @@
 
 ## Working assumptions used
 
-- The first major development milestone is `v0.2.0`.
+- The first major development milestone is `v0.3.0`.
 - The next sensible milestone is a stabilization/release pass on the current
   master branch.
 - Image work stays within the agreed GPU-texture-first and no-general-compression

@@ -284,13 +284,14 @@ and stdlib-only.
 
 ## Status
 
-This project is currently in early `0.2.x` development. The `v0.2.0` milestone
-stabilizes the text-format surface and its fixture-backed tests while keeping
+This project is currently in early `0.3.x` development. The `0.3.0` release
+captures the stabilized text-format surface, the EditorConfig specialization,
+the text namespace move, and the current image/texture subset while keeping
 format-specific subsets explicit.
 
 ## Compatibility Policy
 
-During `0.2.x`, the project aims to keep these behaviors stable unless there is
+During `0.3.x`, the project aims to keep these behaviors stable unless there is
 a strong correctness reason to change them:
 
 - core interface names and generic shapes such as `FormatReader`,
@@ -299,7 +300,7 @@ a strong correctness reason to change them:
 - documented supported subsets for each format
 - fixture-backed serializer output for existing supported constructs
 
-The following may still change within `0.2.x` when needed:
+The following may still change within `0.3.x` when needed:
 
 - unsupported or undocumented edge-case behavior
 - incomplete subset details for specific formats
@@ -316,7 +317,8 @@ Before cutting a release:
    guarantees changed.
 5. Update `./.codex` project memory so future sessions can resume with the
    current assessment and decisions.
-6. Create a version tag only after the API and fixture changes are understood.
+6. Bump the package version only after the API and fixture changes are
+   understood.
 
 ## Roadmap
 

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Bumped the package metadata version to `0.3.0` and refreshed the release
+  wording for the current text-plus-image scope
 - Refreshed `haxelib.json` to advertise the current text and texture format
   scope more accurately
 - Added a canonical image round-trip example showing `TextureData`, `TgaCodec`,

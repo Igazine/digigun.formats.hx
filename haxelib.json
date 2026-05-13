@@ -32,7 +32,7 @@
     "cross"
   ],
   "description": "Pure-Haxe, cross-platform readers and writers for config, data, and texture formats.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "classPath": "src",
   "releasenote": "Text formats live under digigun.formats.text.<format>, EditorConfig is supported as a thin INI specialization, and the image branch covers DDS, KTX, PVR, BMP, TIFF, TGA, PPM/PGM, RAW, and simple TGA RLE.",
   "contributors": [
