@@ -4,9 +4,11 @@
 cross-platform readers and writers for data and file formats.
 
 The library currently focuses on a reusable codec abstraction and built-in INI,
-TOML, CSV, `.properties`, `.env`, YAML, MessagePack, NDJSON, and HCL2
-implementations. It is designed for direct class usage rather than a global
-registry, keeping extension points simple and type-safe.
+EditorConfig, TOML, CSV, `.properties`, `.env`, YAML, MessagePack, NDJSON, and
+HCL2 implementations. It is designed for direct class usage rather than a
+global registry, keeping extension points simple and type-safe.
+
+Text formats live under `digigun.formats.text.<format>`.
 
 ## Features
 
@@ -15,6 +17,7 @@ registry, keeping extension points simple and type-safe.
 - Strongly typed core interfaces
 - Structured parse/write errors
 - Deterministic INI serialization
+- Deterministic EditorConfig serialization on top of the INI document model
 - Deterministic TOML serialization for a typed subset
 - CSV row and cell parsing with deterministic serialization
 - Editable `.properties` and `.env` documents
@@ -22,6 +25,8 @@ registry, keeping extension points simple and type-safe.
 - Binary MessagePack support for core scalar, array, map, and bytes types
 - NDJSON read/write support built on top of `haxe.Json`
 - HCL2 parsing and writing for a documented native syntax subset
+- Image and texture support focused on GPU-ready containers and small
+  uncompressed baselines
 
 ## Install
 
@@ -51,9 +56,9 @@ Small end-to-end examples live under `examples/`:
 
 ```haxe
 import digigun.formats.FormatResult;
-import digigun.formats.ini.IniDocument;
-import digigun.formats.ini.IniReader;
-import digigun.formats.ini.IniWriter;
+import digigun.formats.text.ini.IniDocument;
+import digigun.formats.text.ini.IniReader;
+import digigun.formats.text.ini.IniWriter;
 
 class Example {
   static function main() {
@@ -75,8 +80,8 @@ Format values also support implicit conversion from regular Haxe literals, so
 you can write code like:
 
 ```haxe
-var iniEnabled = new digigun.formats.ini.IniProperty("enabled", true);
-var tomlPorts = new digigun.formats.toml.TomlProperty("ports", [80, 443]);
+var iniEnabled = new digigun.formats.text.ini.IniProperty("enabled", true);
+var tomlPorts = new digigun.formats.text.toml.TomlProperty("ports", [80, 443]);
 ```
 
 ## Extending with your own format
@@ -112,6 +117,22 @@ The INI implementation intentionally targets a well-defined subset rather than
 every variant in the wild. Writer output uses quoting when a string would
 otherwise round-trip back as a boolean or numeric scalar.
 
+## EditorConfig support
+
+The built-in EditorConfig codec is a thin specialization over the INI document
+model and supports:
+
+- `root = true` preamble handling
+- `key = value` entries with lowercase keys
+- `[`glob`]` section headers with escaped literal glob delimiters
+- `#` and `;` comments
+- escaped `#`, `;`, `=`, `:`, and `\` in keys, values, and section globs
+- deterministic serialization of the typed document model
+
+The EditorConfig implementation intentionally stays on the same practical subset
+as the rest of the library and does not attempt to model every historical editor
+variant.
+
 ## TOML support
 
 The built-in TOML codec supports a practical typed subset:
@@ -126,7 +147,8 @@ The built-in TOML codec supports a practical typed subset:
 
 The TOML implementation intentionally does not yet cover every TOML feature,
 such as quoted keys, dotted keys, array-of-tables, dates, and multiline
-strings.
+strings. It also rejects malformed nested array and inline-table delimiters
+instead of trying to recover from them.
 
 ## CSV support
 
@@ -182,7 +204,8 @@ The built-in YAML codec supports a practical block-style subset:
 
 The YAML implementation intentionally does not yet cover anchors, tags,
 multiline strings, arbitrary flow/block mixing beyond the documented subset, or
-the full YAML specification.
+the full YAML specification. It also rejects malformed nested flow delimiters
+instead of trying to recover from them.
 
 ## MessagePack support
 
@@ -225,7 +248,37 @@ The built-in HCL2 codec supports a practical native-syntax subset:
 
 This implementation intentionally does not yet evaluate expressions, templates,
 function calls, traversals, or the full HCL language. It focuses on readable
-and writable configuration structures for literal-only configuration data.
+and writable configuration structures for literal-only configuration data, and
+it rejects malformed nested block and object delimiters.
+
+## Image support
+
+The image branch focuses on a narrow, pure-Haxe texture subset:
+
+- `DDS`: 2D textures with BC1/BC3 payloads, plus practical 24-bit and 32-bit
+  uncompressed input/output
+- `KTX`: 2D single-face textures with RGB8/RGBA8 or BC1/BC3 payloads
+- `PVR`: 2D single-surface PVRTC1 4bpp RGBA textures
+- `BMP`: uncompressed `BI_RGB` 24-bit and 32-bit input/output
+- `TIFF`: uncompressed, contiguous, 8-bit gray/RGB/RGBA input/output
+- `TGA`: 8-bit grayscale and 24-bit/32-bit color, with optional simple RLE
+- `PPM`/`PGM`: binary `P6`/`P5` input/output
+- `RAW`: explicit byte-layout textures for direct buffer exchange
+
+Texture block formats such as BC1, BC3, ETC2, ASTC, and PVRTC are modeled as
+payload targets inside the supported containers. Anything that depends on
+general-purpose compression libraries, such as PNG, stays deferred until the
+separate compression project is ready. This keeps the image branch cross-target
+and stdlib-only.
+
+### Image subset matrix
+
+| Status | Formats |
+| --- | --- |
+| Supported | DDS, KTX, PVR, BMP, TIFF, TGA, PPM/PGM, RAW |
+| Supported subset | DDS 2D BC1/BC3 and uncompressed 24/32-bit, KTX 2D single-face RGB8/RGBA8/BC1/BC3, PVR 2D single-surface PVRTC1, BMP `BI_RGB`, TIFF uncompressed contiguous 8-bit gray/RGB/RGBA, TGA 8/24/32-bit with optional RLE, PPM/PGM binary `P6`/`P5`, RAW explicit layout |
+| Unsupported | TIFF compression, BMP compression, KTX arrays/cubemaps/3D, PVR multi-surface, TGA color-mapped input |
+| Deferred | PNG and any format that depends on general-purpose compression libraries |
 
 ## Status
 

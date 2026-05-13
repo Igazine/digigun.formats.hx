@@ -1,7 +1,7 @@
 import digigun.formats.FormatResult;
-import digigun.formats.msgpack.MessagePackCodec;
-import digigun.formats.msgpack.MessagePackDocument;
-import digigun.formats.msgpack.MessagePackMap;
+import digigun.formats.text.msgpack.MessagePackCodec;
+import digigun.formats.text.msgpack.MessagePackDocument;
+import digigun.formats.text.msgpack.MessagePackMap;
 
 class MessagePackRoundTripExample {
   static function main() {

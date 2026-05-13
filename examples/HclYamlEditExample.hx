@@ -1,7 +1,7 @@
 import digigun.formats.FormatResult;
-import digigun.formats.hcl.HclDocument;
-import digigun.formats.yaml.YamlDocument;
-import digigun.formats.yaml.YamlObject;
+import digigun.formats.text.hcl.HclDocument;
+import digigun.formats.text.yaml.YamlDocument;
+import digigun.formats.text.yaml.YamlObject;
 
 class HclYamlEditExample {
   static function main() {

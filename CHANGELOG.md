@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Added additional image edge-case coverage for unsupported BMP info-header
+  sizes, truncated TGA RLE packets, unsupported TIFF planar configuration, and
+  unsupported PVR pixel-format metadata
+- Added image contract tests for unsupported BMP compression, DDS fourCC,
+  KTX array textures, PVR multi-surface inputs, TIFF compression, and TGA
+  color-mapped headers
+- Tightened the README image support matrix to spell out the supported subset
+  per format
+- Added image-suite runner wiring to `TestMain` and covered TGA RLE round-trips
+  with a fixture-backed regression test
+- Added simple TGA RLE packet support as a pure-Haxe low-complexity texture
+  path
+- Documented the image-branch scope in the README as GPU containers plus small
+  uncompressed baselines
+- Moved all text formats under `digigun.formats.text.<format>` while keeping
+  each format’s internal structure intact
+- Relocated text fixtures and tests under `test/fixtures/text/` and
+  `test/test/text/`
+- Tightened TOML and YAML malformed nested delimiter rejection in the flow and
+  inline collection scanners
+- Clarified TOML, YAML, and HCL malformed-collection rejection behavior in the
+  README
+
+- Added EditorConfig parsing, writing, and document helpers as a thin
+  specialization over the INI document model
+- Added fixture-backed EditorConfig parse, round-trip, and invalid-input tests
+- Documented the supported EditorConfig subset in the README
+
 - Began `text-hardening/ini-env-properties`
 - Fixed INI writer quoting so string values that look like booleans or numbers
   round-trip as strings
