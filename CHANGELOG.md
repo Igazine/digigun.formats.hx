@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added a canonical image round-trip example showing `TextureData`, `TgaCodec`,
+  and texture-compression support lookup in one place
 - Added additional image edge-case coverage for unsupported BMP info-header
   sizes, truncated TGA RLE packets, unsupported TIFF planar configuration, and
   unsupported PVR pixel-format metadata

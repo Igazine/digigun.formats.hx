@@ -51,6 +51,8 @@ Small end-to-end examples live under `examples/`:
 - `examples/MessagePackRoundTripExample.hx` for binary round-trip usage
 - `examples/NdjsonProcessExample.hx` for line-oriented JSON processing
 - `examples/HclYamlEditExample.hx` for block and mapping editing
+- `examples/ImageTextureRoundTripExample.hx` for a minimal texture round-trip
+  and compression-planning example
 
 ## Basic usage
 

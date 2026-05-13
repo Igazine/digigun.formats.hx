@@ -20,20 +20,21 @@
   inputs, TIFF compression, and TGA color-mapped headers.
 - The current image docs now spell out the supported subset per format in the
   README, including an explicit supported/unsupported/deferred matrix.
+- A canonical image round-trip example now lives in `examples/` and shows
+  `TextureData`, `TgaCodec`, and compression-planning lookup in one place.
 
 ## Current repo state
 
-- Active branch: `text-editorconfig`
-- Latest commit on this branch before the current image pass: `0b3a5f0`
-  (`Add image texture support and TGA RLE`)
+- Active branch: `master`
+- Latest commit on this branch before the final stabilization pass: `d5272dc`
+  (`Merge branch 'text-editorconfig'`)
 - Latest stabilized milestone on `master`: tag `v0.2.0` at commit `572a54f`
 - Verification status at end of session:
   - `haxe build.hxml` passed
   - `haxe test.hxml` passed
-- Current working tree is in-progress with image hardening edits staged or
-  modified.
-- The current image pass is focused on locking the supported subset and
-  documenting it, not broadening scope.
+- Current working tree contains the final stabilization docs/example edits.
+- The current pass is focused on keeping the library feeling finished: examples,
+  one more contract sweep, and release readiness.
 
 ## Files intentionally changed for the text milestone
 
@@ -57,10 +58,10 @@
 ## Working assumptions used
 
 - The first major development milestone is `v0.2.0`.
-- The milestone should be commit-and-tag ready once text-format tests pass and
-  docs are aligned.
-- Image work is now the next active branch of work, but only within the agreed
-  GPU-texture-first and no-general-compression policy.
+- The next sensible milestone is a stabilization/release pass on the current
+  master branch.
+- Image work stays within the agreed GPU-texture-first and no-general-compression
+  policy.
 
 ## Resume guidance
 
@@ -68,9 +69,8 @@ When resuming this project in a future Codex session:
 
 1. Read `.codex/assessment.md`.
 2. Read `.codex/next-steps.md`.
-3. Check `git status --short --branch` to see the current image-hardening
-   checkpoint.
-4. Resume the image contract pass, then verify with `haxe build.hxml` and
-   `haxe test.hxml`.
-5. Reconfirm whether the next step is more image hardening or a new image
-   format decision.
+3. Check `git status --short --branch` to see the current stabilization edits.
+4. Resume from the image example / README / changelog checkpoint, then verify
+   with `haxe build.hxml` and `haxe test.hxml`.
+5. Decide whether the next step is tagging a release or another small cleanup
+   pass.
