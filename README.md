@@ -25,6 +25,8 @@ Text formats live under `digigun.formats.text.<format>`.
 - Binary MessagePack support for core scalar, array, map, and bytes types
 - NDJSON read/write support built on top of `haxe.Json`
 - HCL2 parsing and writing for a documented native syntax subset
+- Image and texture support focused on GPU-ready containers and small
+  uncompressed baselines
 
 ## Install
 
@@ -248,6 +250,20 @@ This implementation intentionally does not yet evaluate expressions, templates,
 function calls, traversals, or the full HCL language. It focuses on readable
 and writable configuration structures for literal-only configuration data, and
 it rejects malformed nested block and object delimiters.
+
+## Image support
+
+The image branch focuses on a narrow, pure-Haxe texture subset:
+
+- GPU-oriented containers such as DDS, KTX, and PVR
+- simple uncompressed baselines such as BMP, RAW, PPM/PGM, and TIFF
+- TGA with optional simple RLE packets for compact low-complexity encoding
+- texture block formats such as BC1, BC3, ETC2, ASTC, and PVRTC as payload
+  targets inside the supported containers
+
+Formats that depend on general-purpose compression libraries, such as PNG, are
+intentionally deferred until the separate compression project is ready. This
+keeps the image branch cross-target and stdlib-only.
 
 ## Status
 

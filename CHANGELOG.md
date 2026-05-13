@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Added image-suite runner wiring to `TestMain` and covered TGA RLE round-trips
+  with a fixture-backed regression test
+- Added simple TGA RLE packet support as a pure-Haxe low-complexity texture
+  path
+- Documented the image-branch scope in the README as GPU containers plus small
+  uncompressed baselines
 - Moved all text formats under `digigun.formats.text.<format>` while keeping
   each format’s internal structure intact
 - Relocated text fixtures and tests under `test/fixtures/text/` and
