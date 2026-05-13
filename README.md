@@ -271,6 +271,15 @@ general-purpose compression libraries, such as PNG, stays deferred until the
 separate compression project is ready. This keeps the image branch cross-target
 and stdlib-only.
 
+### Image subset matrix
+
+| Status | Formats |
+| --- | --- |
+| Supported | DDS, KTX, PVR, BMP, TIFF, TGA, PPM/PGM, RAW |
+| Supported subset | DDS 2D BC1/BC3 and uncompressed 24/32-bit, KTX 2D single-face RGB8/RGBA8/BC1/BC3, PVR 2D single-surface PVRTC1, BMP `BI_RGB`, TIFF uncompressed contiguous 8-bit gray/RGB/RGBA, TGA 8/24/32-bit with optional RLE, PPM/PGM binary `P6`/`P5`, RAW explicit layout |
+| Unsupported | TIFF compression, BMP compression, KTX arrays/cubemaps/3D, PVR multi-surface, TGA color-mapped input |
+| Deferred | PNG and any format that depends on general-purpose compression libraries |
+
 ## Status
 
 This project is currently in early `0.2.x` development. The `v0.2.0` milestone
