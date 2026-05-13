@@ -22,6 +22,8 @@
   README, including an explicit supported/unsupported/deferred matrix.
 - A canonical image round-trip example now lives in `examples/` and shows
   `TextureData`, `TgaCodec`, and compression-planning lookup in one place.
+- `haxelib.json` now advertises the image and texture scope alongside the text
+  formats, and the repository URL matches the current GitHub location.
 
 ## Current repo state
 

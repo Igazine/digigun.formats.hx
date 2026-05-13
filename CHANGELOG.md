@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Refreshed `haxelib.json` to advertise the current text and texture format
+  scope more accurately
 - Added a canonical image round-trip example showing `TextureData`, `TgaCodec`,
   and texture-compression support lookup in one place
 - Added additional image edge-case coverage for unsupported BMP info-header

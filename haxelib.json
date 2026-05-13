@@ -1,13 +1,15 @@
 {
   "name": "digigun.formats.hx",
-  "url": "https://github.com/igazine/digigun.formats.hx",
+  "url": "https://github.com/Igazine/digigun.formats.hx",
   "license": "MIT",
   "tags": [
     "haxe",
     "format",
+    "codec",
     "parser",
     "serializer",
     "ini",
+    "editorconfig",
     "toml",
     "csv",
     "properties",
@@ -16,13 +18,23 @@
     "msgpack",
     "ndjson",
     "hcl2",
-    "cross",
-    "editorconfig"
+    "image",
+    "texture",
+    "gpu",
+    "dds",
+    "ktx",
+    "pvr",
+    "tga",
+    "bmp",
+    "tiff",
+    "ppm",
+    "raw",
+    "cross"
   ],
-  "description": "Strongly typed, cross-platform readers and writers for file and data formats.",
+  "description": "Pure-Haxe, cross-platform readers and writers for config, data, and texture formats.",
   "version": "0.2.0",
   "classPath": "src",
-  "releasenote": "Text-format milestone plus continued hardening and EditorConfig support built as a thin specialization over the INI model.",
+  "releasenote": "Text formats live under digigun.formats.text.<format>, EditorConfig is supported as a thin INI specialization, and the image branch covers DDS, KTX, PVR, BMP, TIFF, TGA, PPM/PGM, RAW, and simple TGA RLE.",
   "contributors": [
     "Igazine"
   ]
