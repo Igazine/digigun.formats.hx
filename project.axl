@@ -1,0 +1,58 @@
+@meta
+id: digigun-formats-hx
+v: 0.2
+name: digigun.formats.hx
+created: @20260514T1728
+modified: @20260514T1844
+agents: gpt-5
+tags: haxe|haxelib|formats|codec|parser|serializer|texture
+
+@state
+status: WIP
+focus: image API consistency and clearer contract boundaries between upload support and fresh built-in encoding
+phase: stabilization
+blockers: ~
+last_act: ACT:clarified the image API contract and example usage around uploadable formats versus freshly encodable compression families
+next_act: decide whether to stop at the current hardened image subset or resume capability work on deferred ASTC/PVRTC built-in encoding
+err: ~
+>>mem
+package_kind: haxelib
+language: Haxe
+release_line: 0.3.x
+repo_scope: strongly typed cross-platform readers and writers for data and file formats
+
+@plan
+>>milestones
+M_v030:DONE:~:0.3.0 stabilized text and image subset
+>>text
+text-surface:DONE:P0:Stabilize text format readers and writers under digigun.formats.text
+editorconfig:DONE:P1:Add EditorConfig as a thin INI specialization
+>>image
+image-core:WIP:P0:Harden lightweight GPU texture families and container support
+image-docs:WIP:P1:Keep README and haxelib metadata aligned with the supported image subset
+>>project
+state-tracking:WIP:P1:Maintain local-only AXL continuity for future Codex sessions
+
+@ctx
+>>constraints
+> keep implementations pure Haxe and stdlib-only
+> support all Haxe targets without target-specific dependencies
+> do not add formats that require general-purpose compression libraries until the separate compression project exists
+>>workflow
+> keep supported subsets explicit in docs and tests
+> prefer small hardening passes over uncontrolled surface-area growth
+> do not track .codex files in git
+
+@log
+@20260514T1728:gpt-5:ACT:initialized project.axl for digigun.formats.hx and inferred the current text-plus-image scope
+@20260514T1805:gpt-5:ACT:reviewed repository state and recommended the next post-0.3.0 priorities around image-stack hardening rather than new format sprawl
+@20260514T1809:gpt-5:ACT:made image planning strict by filtering deferred ASTC/PVRTC encoders out of fresh built-in encode plans, fixed raw fallback for incompatible preferred containers, and aligned tests/docs
+@20260514T1811:gpt-5:ACT:hardened DDS, KTX, and PVR readers with explicit dimension and offset validation and added malformed-container rejection tests for truncated metadata and mip payload cases
+@20260514T1815:gpt-5:ACT:classified text-format omissions into practical roadmap items (especially TOML) versus deliberate subset boundaries (especially YAML full-spec and HCL evaluation)
+@20260514T1820:gpt-5:ACT:added TOML quoted and dotted key-path support with canonical writer output, kept array-of-tables deferred pending a document-model extension, and revised README wording to distinguish planned versus out-of-scope text-format gaps
+@20260514T1835:gpt-5:ACT:added YAML block-scalar support for literal and folded multiline strings, made multiline writer output deterministic with literal blocks, and kept broader YAML-spec features explicitly out of scope
+@20260514T1840:gpt-5:ACT:normalized README contract wording across INI, EditorConfig, TOML, CSV, properties, env, YAML, MessagePack, NDJSON, and HCL using explicit deferred versus out-of-scope statements
+@20260514T1842:gpt-5:ACT:closed the text-expansion loop by declaring the current text surface functionally mature for 0.3.x and shifting future text work to concrete needs only
+@20260514T1844:gpt-5:ACT:clarified the image API boundary between GPU upload support and fresh built-in encoders, updated the canonical example, and added tests that the recommended compression baselines are actually built-in encodable
+
+@ref
