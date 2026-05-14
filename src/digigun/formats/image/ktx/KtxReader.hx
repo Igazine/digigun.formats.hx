@@ -51,6 +51,10 @@ class KtxReader implements FormatReader<Bytes, TextureData> {
     var mipLevels = readUInt32(input, 56);
     var keyValueBytes = readUInt32(input, 60);
 
+    if (pixelWidth <= 0 || pixelHeight <= 0) {
+      return failure(FormatErrorCode.InvalidStructure, "KTX dimensions must be greater than zero.");
+    }
+
     if (pixelDepth != 0 || arrayElements != 0 || faces != 1) {
       return failure(FormatErrorCode.UnsupportedFeature, "Only 2D non-array single-face KTX textures are supported.");
     }
@@ -67,7 +71,14 @@ class KtxReader implements FormatReader<Bytes, TextureData> {
     var texture = new TextureData(TextureDimension.Texture2D, new ImageSize(pixelWidth, pixelHeight), format);
     var surface = texture.getOrCreatePrimarySurface();
     var offset = 64 + keyValueBytes;
+    if (offset < 64 || offset > input.length) {
+      return failure(FormatErrorCode.InvalidStructure, "KTX key-value metadata is truncated.");
+    }
+
     for (level in 0...mipLevels) {
+      if (offset + 4 > input.length) {
+        return failure(FormatErrorCode.InvalidStructure, "KTX mip header is truncated.");
+      }
       var imageSize = readUInt32(input, offset);
       offset += 4;
       if (offset + imageSize > input.length) {

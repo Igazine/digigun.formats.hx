@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- Clarified the image API contract around upload support versus fresh built-in
+  encoding, and updated the canonical example to use the correct planning APIs
+- Declared the current text-format surface functionally mature for `0.3.x`,
+  with future text work gated on concrete needs or correctness gaps
+- Clarified the README contract for all text formats by separating supported
+  behavior from explicitly deferred work and out-of-scope features
+- Added YAML block-scalar parsing for `|` and `>` plus deterministic multiline
+  string writing through literal block-scalar output
+- Added TOML support for quoted and dotted property keys, inline-table keys,
+  and table names, and documented `array-of-tables` as the next TOML feature
+  that requires a document-model extension
+- Tightened the image planner so fresh built-in encoding no longer auto-selects
+  deferred ASTC or PVRTC encoders, while still allowing passthrough for
+  already-compressed sources
+- Fixed uncompressed image-plan fallback to switch to `Raw` when a preferred
+  container such as `PVR` cannot store the fallback layout
+- Added explicit DDS, KTX, and PVR rejection coverage for zero dimensions,
+  truncated metadata, truncated mip headers, and truncated mip payloads
 - Added ETC2 RGBA8, EAC R11, and EAC RG11 texture compression support with
   KTX wiring, upload checks, and planner coverage for alpha and channel-based
   sources

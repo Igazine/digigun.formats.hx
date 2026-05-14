@@ -37,6 +37,10 @@ class PvrReader implements FormatReader<Bytes, TextureData> {
     var mipCount = BinaryTools.readUInt32LE(input, 44);
     var metadataSize = BinaryTools.readUInt32LE(input, 48);
 
+    if (width <= 0 || height <= 0) {
+      return failure(FormatErrorCode.InvalidStructure, "PVR dimensions must be greater than zero.");
+    }
+
     if (pixelFormatHigh != 0) {
       return failure(FormatErrorCode.UnsupportedFeature, "Only predefined PVR pixel-format identifiers are supported.");
     }
@@ -59,6 +63,10 @@ class PvrReader implements FormatReader<Bytes, TextureData> {
     var texture = new TextureData(TextureDimension.Texture2D, new ImageSize(width, height), format);
     var surface = texture.getOrCreatePrimarySurface();
     var offset = 52 + metadataSize;
+    if (offset < 52 || offset > input.length) {
+      return failure(FormatErrorCode.InvalidStructure, "PVR metadata payload is truncated.");
+    }
+
     for (level in 0...mipCount) {
       var levelSize = texture.size.atMipLevel(level);
       var byteLength = format.byteLengthFor(levelSize);

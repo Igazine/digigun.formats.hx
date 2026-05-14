@@ -18,6 +18,8 @@ class DdsTests {
     testDdsBc5RoundTrip();
     testDdsMipChainRoundTrip();
     testDdsUnsupportedFourCc();
+    testDdsZeroDimensions();
+    testDdsTruncatedMipPayload();
     testInvalidDds();
   }
 
@@ -150,6 +152,49 @@ class DdsTests {
             Assertions.assertEquals("dds unsupported fourcc code", FormatErrorCode.UnsupportedFeature, error.code);
           case Success(_):
             Assertions.fail("Expected unsupported DDS fourCC to fail.");
+        }
+      case Failure(error):
+        Assertions.fail('Expected DDS compressed write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testDdsZeroDimensions():Void {
+    var texture = TextureData.fromBytes2D(new ImageSize(2, 1), PixelFormats.BGRA8_UNORM, Bytes.ofHex("1122334455667788"));
+    var codec = new DdsCodec();
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        var invalid = Bytes.alloc(encoded.length);
+        invalid.blit(0, encoded, 0, encoded.length);
+        invalid.set(16, 0);
+        invalid.set(17, 0);
+        invalid.set(18, 0);
+        invalid.set(19, 0);
+        switch (codec.read(invalid)) {
+          case Failure(error):
+            Assertions.assertEquals("dds zero dimensions code", FormatErrorCode.InvalidStructure, error.code);
+          case Success(_):
+            Assertions.fail("Expected zero-width DDS bytes to fail.");
+        }
+      case Failure(error):
+        Assertions.fail('Expected DDS BGRA write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testDdsTruncatedMipPayload():Void {
+    var texture = new TextureData(digigun.formats.image.TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.BC1_RGB_UNORM);
+    var surface = texture.getOrCreatePrimarySurface();
+    surface.setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.ofHex("1122334455667788"))));
+    var codec = new DdsCodec();
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        var truncated = encoded.sub(0, encoded.length - 1);
+        switch (codec.read(truncated)) {
+          case Failure(error):
+            Assertions.assertEquals("dds truncated mip payload code", FormatErrorCode.InvalidStructure, error.code);
+          case Success(_):
+            Assertions.fail("Expected truncated DDS mip payload to fail.");
         }
       case Failure(error):
         Assertions.fail('Expected DDS compressed write to succeed: ${error.toString()}');

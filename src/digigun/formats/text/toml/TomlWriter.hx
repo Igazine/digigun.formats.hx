@@ -5,6 +5,8 @@ import digigun.formats.FormatWriter;
 import digigun.formats.internal.TextFormatTools;
 import digigun.formats.text.toml.TomlValue.TomlValueData;
 
+using StringTools;
+
 /**
  * Serializes a `TomlDocument` into deterministic TOML text for the supported subset.
  */
@@ -29,7 +31,7 @@ class TomlWriter implements FormatWriter<TomlDocument, String> {
         lines.push("");
       }
 
-      lines.push('[${table.name}]');
+      lines.push('[${renderKey(table.name)}]');
       appendProperties(lines, table.properties);
     }
 
@@ -38,7 +40,7 @@ class TomlWriter implements FormatWriter<TomlDocument, String> {
 
   function appendProperties(lines:Array<String>, properties:Array<TomlProperty>):Void {
     for (property in properties) {
-      lines.push('${property.key} = ${renderValue(property.value)}');
+      lines.push('${renderKey(property.key)} = ${renderValue(property.value)}');
     }
   }
 
@@ -70,12 +72,96 @@ class TomlWriter implements FormatWriter<TomlDocument, String> {
   function renderObject(value:TomlObject):String {
     var rendered = new Array<String>();
     for (field in value.fields) {
-      rendered.push('${field.key} = ${renderValue(field.value)}');
+      rendered.push('${renderKey(field.key)} = ${renderValue(field.value)}');
     }
     return '{ ${rendered.join(", ")} }';
   }
 
   function renderString(value:String):String {
     return '"${TextFormatTools.escapeDoubleQuoted(value)}"';
+  }
+
+  function renderKey(value:String):String {
+    var parts = splitKeySegments(value);
+    if (parts == null) {
+      return renderKeySegment(value);
+    }
+
+    var rendered = new Array<String>();
+    for (part in parts) {
+      rendered.push(renderKeySegment(part));
+    }
+    return rendered.join(".");
+  }
+
+  function splitKeySegments(value:String):Null<Array<String>> {
+    var segments = new Array<String>();
+    var current = new StringBuf();
+    var quote:Null<String> = null;
+    var escaping = false;
+
+    for (index in 0...value.length) {
+      var char = value.charAt(index);
+      if (quote != null) {
+        current.add(char);
+        if (escaping) {
+          escaping = false;
+        } else if (char == "\\" && quote == "\"") {
+          escaping = true;
+        } else if (char == quote) {
+          quote = null;
+        }
+        continue;
+      }
+
+      switch (char) {
+        case "\"", "'":
+          quote = char;
+          current.add(char);
+        case ".":
+          segments.push(current.toString());
+          current = new StringBuf();
+        default:
+          current.add(char);
+      }
+    }
+
+    if (quote != null) {
+      return null;
+    }
+
+    segments.push(current.toString());
+    return segments;
+  }
+
+  function renderKeySegment(value:String):String {
+    var trimmed = value.trim();
+    if (trimmed == "") {
+      return renderString(value);
+    }
+
+    if (TextFormatTools.isQuoted(trimmed)) {
+      return renderString(TextFormatTools.unescape(trimmed.substr(1, trimmed.length - 2)));
+    }
+
+    return isBareKeySegment(trimmed) ? trimmed : renderString(value);
+  }
+
+  function isBareKeySegment(value:String):Bool {
+    if (value == "") {
+      return false;
+    }
+
+    for (index in 0...value.length) {
+      var char = value.charAt(index);
+      var code = char.charCodeAt(0);
+      var isAlpha = (code >= "A".code && code <= "Z".code) || (code >= "a".code && code <= "z".code);
+      var isDigit = code >= "0".code && code <= "9".code;
+      if (!(isAlpha || isDigit || char == "_" || char == "-")) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }

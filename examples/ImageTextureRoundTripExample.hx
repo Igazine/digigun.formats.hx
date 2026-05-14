@@ -4,6 +4,7 @@ import digigun.formats.image.PixelFormats;
 import digigun.formats.image.TextureCompressionSupport;
 import digigun.formats.image.TextureData;
 import digigun.formats.image.TextureFormatSupport;
+import digigun.formats.image.TextureEncodingRequest;
 import digigun.formats.image.tga.TgaCodec;
 import haxe.io.Bytes;
 
@@ -13,7 +14,9 @@ class ImageTextureRoundTripExample {
     var codec = new TgaCodec();
 
     trace("webgl supports ETC2: " + TextureFormatSupport.canUpload(GraphicsApi.WebGL, PixelFormats.ETC2_RGB8_UNORM));
-    trace("metal preferred container: " + TextureCompressionSupport.recommendCompression(GraphicsApi.Metal).container);
+    trace("metal recommended baseline: " + TextureFormatSupport.recommendCompression(GraphicsApi.Metal).format.id);
+    trace("astc built-in encoder available: " + TextureCompressionSupport.hasBuiltInEncoder(digigun.formats.image.TextureCompressionMethod.Astc4x4Rgba));
+    trace("metal concrete plan: " + TextureCompressionSupport.buildPlan(new TextureEncodingRequest(GraphicsApi.Metal, texture)).outputFormat.id);
 
     switch (codec.write(texture)) {
       case Success(bytes):

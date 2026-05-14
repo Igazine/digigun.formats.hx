@@ -74,9 +74,9 @@ class TextureFormatSupport {
       case GraphicsApi.WebGL:
         new TextureCompressionPlan(api, PixelFormats.ETC2_RGB8_UNORM, TextureContainerFormat.Ktx, "ETC2 has strong WebGL 2 alignment and KTX is a natural container.");
       case GraphicsApi.Vulkan:
-        new TextureCompressionPlan(api, PixelFormats.ASTC_4X4_RGBA_UNORM, TextureContainerFormat.Ktx, "ASTC is a strong general-purpose Vulkan target and KTX is the most natural Khronos container.");
+        new TextureCompressionPlan(api, PixelFormats.ETC2_RGBA8_UNORM, TextureContainerFormat.Ktx, "ETC2/EAC is the strongest built-in Khronos-family compression path currently implemented by the library.");
       case GraphicsApi.Metal:
-        new TextureCompressionPlan(api, PixelFormats.ASTC_4X4_RGBA_UNORM, TextureContainerFormat.Ktx, "ASTC is the preferred modern Apple GPU compression family.");
+        new TextureCompressionPlan(api, PixelFormats.BC3_RGBA_UNORM, TextureContainerFormat.Ktx, "BC-compressed KTX assets are the strongest built-in Metal fallback until ASTC and PVRTC encoders are implemented.");
       case GraphicsApi.Direct3D11:
         new TextureCompressionPlan(api, PixelFormats.BC3_RGBA_UNORM, TextureContainerFormat.Dds, "BC-compressed DDS assets fit the Direct3D-style pipeline well.");
       default:

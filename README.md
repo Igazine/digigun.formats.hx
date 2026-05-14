@@ -119,6 +119,11 @@ The INI implementation intentionally targets a well-defined subset rather than
 every variant in the wild. Writer output uses quoting when a string would
 otherwise round-trip back as a boolean or numeric scalar.
 
+Deferred: only concrete INI dialect features that appear in real fixtures and
+still fit the current typed document model.
+
+Out of scope for now: trying to normalize every historical INI dialect.
+
 ## EditorConfig support
 
 The built-in EditorConfig codec is a thin specialization over the INI document
@@ -135,22 +140,37 @@ The EditorConfig implementation intentionally stays on the same practical subset
 as the rest of the library and does not attempt to model every historical editor
 variant.
 
+Deferred: only clearly useful EditorConfig edge cases that still fit the thin
+INI-specialization model.
+
+Out of scope for now: broad compatibility work for every historical editor
+variant.
+
 ## TOML support
 
 The built-in TOML codec supports a practical typed subset:
 
 - comments starting with `#`
-- top-level key/value pairs with bare keys
-- named tables like `[server]` using bare table names
+- top-level key/value pairs with bare, quoted, or dotted keys
+- named tables like `[server]`, including quoted and dotted table names
 - scalar values inferred as `String`, `Int`, `Float`, or `Bool`
 - arrays with nested scalar and array values
-- inline tables such as `{ owner = "digigun", active = true }` with bare keys
+- inline tables such as `{ owner = "digigun", active = true }` with bare,
+  quoted, or dotted keys
 - deterministic serialization of the typed document model
 
-The TOML implementation intentionally does not yet cover every TOML feature,
-such as quoted keys, dotted keys, array-of-tables, dates, and multiline
-strings. It also rejects malformed nested array and inline-table delimiters
-instead of trying to recover from them.
+The TOML implementation now covers the practical key-path features that show up
+frequently in real configuration files, including quoted and dotted keys. The
+current document model still intentionally leaves `array-of-tables`, date/time
+values, and multiline strings for later work. Dotted keys are preserved as
+canonical TOML key paths; they are not automatically expanded into nested table
+objects inside the current document API. Malformed nested array and inline-table
+delimiters are rejected instead of being recovered from implicitly.
+
+Deferred: `array-of-tables`, date/time values, and multiline strings.
+
+Out of scope for now: fully dynamic TOML model reshaping beyond the current
+editable document API.
 
 ## CSV support
 
@@ -165,6 +185,12 @@ The CSV implementation intentionally uses a strict quoting subset: quotes must
 start at the beginning of a cell, and no extra characters are accepted after a
 closing quote before the delimiter or line ending.
 
+Deferred: only compatibility relaxations that improve real-world CSV fixtures
+without making serializer behavior ambiguous.
+
+Out of scope for now: dialect auto-detection or permissive recovery from
+malformed quoted cells.
+
 ## `.properties` support
 
 The built-in `.properties` codec supports:
@@ -177,6 +203,11 @@ The built-in `.properties` codec supports:
 This implementation treats escaped `=` and `:` as literal key/value content and
 escapes them again during writing so delimiter-bearing keys and values
 round-trip correctly.
+
+Deferred: only additional escaping or continuation behaviors that are common
+enough to justify a stable contract.
+
+Out of scope for now: trying to absorb every `.properties` dialect variant.
 
 ## `.env` support
 
@@ -192,6 +223,11 @@ This implementation currently treats `#` as a comment only when it starts a
 line. Inside unquoted values it is preserved literally, and the writer emits one
 entry per line without a trailing newline.
 
+Deferred: inline-comment handling or other shell-adjacent cases if they can be
+specified narrowly and tested clearly.
+
+Out of scope for now: turning `.env` into a shell parser.
+
 ## YAML support
 
 The built-in YAML codec supports a practical block-style subset:
@@ -200,14 +236,23 @@ The built-in YAML codec supports a practical block-style subset:
 - sequences with scalar or nested values
 - flow-style arrays such as `[alpha, "beta:2", null]`
 - flow-style objects such as `{ owner: digigun, active: true }`
+- block scalars using `|` and `>` for multiline string content
 - scalar values inferred as `String`, `Int`, `Float`, `Bool`, or `null`
 - mutable object and array editing
 - deterministic serialization with two-space indentation
 
-The YAML implementation intentionally does not yet cover anchors, tags,
-multiline strings, arbitrary flow/block mixing beyond the documented subset, or
-the full YAML specification. It also rejects malformed nested flow delimiters
-instead of trying to recover from them.
+The YAML implementation intentionally stays a practical subset. Anchors, tags,
+arbitrary flow/block mixing beyond the documented subset, and the full YAML
+specification are out of scope for now. Built-in multiline string writing uses
+literal block-scalar output (`|`) for deterministic round trips, while malformed
+nested flow delimiters are already rejected instead of being recovered from
+implicitly.
+
+Deferred: only pragmatic YAML additions such as more block-scalar niceties when
+they fit the current deterministic document model.
+
+Out of scope for now: anchors, tags, broad schema semantics, and full-spec YAML
+compatibility.
 
 ## MessagePack support
 
@@ -218,10 +263,15 @@ The built-in MessagePack codec supports a practical binary subset:
 - mutable map and array editing
 - deterministic serialization for supported types
 
-The MessagePack implementation intentionally does not yet cover extension types
-or 64-bit integers outside the Haxe `Int` range. Generic binary maps may use
-non-string keys, but the convenience `getProperty`/`setProperty` helpers are
-specifically for string-keyed entries.
+The MessagePack implementation intentionally leaves extension types and 64-bit
+integers outside the Haxe `Int` range for later API work. Generic binary maps
+may use non-string keys, but the convenience `getProperty`/`setProperty`
+helpers are specifically for string-keyed entries.
+
+Deferred: extension types and a deliberate 64-bit value story if the public API
+can support them cleanly across Haxe targets.
+
+Out of scope for now: ad hoc target-specific integer handling.
 
 ## NDJSON support
 
@@ -237,6 +287,11 @@ This implementation intentionally delegates JSON semantics to the standard
 library instead of reimplementing JSON parsing or writing. The writer emits one
 record per line without a trailing newline.
 
+Deferred: only line-oriented conveniences that stay within stdlib JSON
+semantics.
+
+Out of scope for now: custom JSON parsing behavior separate from `haxe.Json`.
+
 ## HCL2 support
 
 The built-in HCL2 codec supports a practical native-syntax subset:
@@ -248,10 +303,24 @@ The built-in HCL2 codec supports a practical native-syntax subset:
 - heredoc strings such as `<<EOF ... EOF`
 - mutable block and attribute editing
 
-This implementation intentionally does not yet evaluate expressions, templates,
-function calls, traversals, or the full HCL language. It focuses on readable
-and writable configuration structures for literal-only configuration data, and
-it rejects malformed nested block and object delimiters.
+This implementation intentionally keeps HCL on the literal-data side. It does
+not evaluate expressions, templates, function calls, traversals, or the full
+HCL language, and those are better treated as out of scope unless the library
+ever grows into a real evaluator. It rejects malformed nested block and object
+delimiters.
+
+Deferred: only literal-data syntax improvements that do not require language
+evaluation.
+
+Out of scope for now: expression evaluation, templates, traversals, function
+calls, and full HCL execution semantics.
+
+## Text format status
+
+The current text-format surface should now be treated as functionally mature for
+the `0.3.x` line. Additional text-format work should happen only when there is
+a concrete format need or a clear correctness gap, not just to chase broader
+spec coverage for its own sake.
 
 ## Image support
 
@@ -268,10 +337,22 @@ The image branch focuses on a narrow, pure-Haxe texture subset:
 - `RAW`: explicit byte-layout textures for direct buffer exchange
 
 Texture block formats such as BC1, BC3, BC4, BC5, ETC2, EAC, ASTC, and PVRTC are modeled as
-payload targets inside the supported containers. Anything that depends on
-general-purpose compression libraries, such as PNG, stays deferred until the
-separate compression project is ready. This keeps the image branch cross-target
-and stdlib-only.
+payload targets inside the supported containers. Fresh built-in encoding is
+currently implemented for BC1/BC3/BC4/BC5 and ETC2/EAC. ASTC and PVRTC remain
+useful upload and passthrough targets, but fresh built-in encoding for them is
+still deferred. Anything that depends on general-purpose compression libraries,
+such as PNG, stays deferred until the separate compression project is ready.
+This keeps the image branch cross-target and stdlib-only.
+
+In practical terms:
+
+- `TextureFormatSupport.canUpload(...)` answers whether a GPU/API family can use
+  a format.
+- `TextureCompressionSupport.hasBuiltInEncoder(...)` answers whether the library
+  can freshly encode that compression family today.
+- `TextureCompressionSupport.buildPlan(...)` only auto-selects fresh encoding
+  paths that are currently realizable, while still allowing passthrough for
+  already-compressed ASTC/PVRTC inputs.
 
 ### Image subset matrix
 
@@ -279,8 +360,8 @@ and stdlib-only.
 | --- | --- |
 | Supported | DDS, KTX, PVR, BMP, TIFF, TGA, PPM/PGM, RAW |
 | Supported subset | DDS 2D BC1/BC3/BC4/BC5 and uncompressed 24/32-bit, KTX 2D single-face RG8/RGB8/RGBA8/BC1/BC3/BC4/BC5/ETC2/EAC, PVR 2D single-surface PVRTC1, BMP `BI_RGB`, TIFF uncompressed contiguous 8-bit gray/RGB/RGBA, TGA 8/24/32-bit with optional RLE, PPM/PGM binary `P6`/`P5`, RAW explicit layout |
+| Deferred inside supported families | Fresh ASTC and PVRTC block encoding, PNG and any format that depends on general-purpose compression libraries |
 | Unsupported | TIFF compression, BMP compression, KTX arrays/cubemaps/3D, PVR multi-surface, TGA color-mapped input |
-| Deferred | PNG and any format that depends on general-purpose compression libraries |
 
 ## Status
 
@@ -315,8 +396,9 @@ Before cutting a release:
 3. Review any changed fixture outputs intentionally.
 4. Update `README.md`, `CHANGELOG.md`, and `haxelib.json` if format support or
    guarantees changed.
-5. Update `./.codex` project memory so future sessions can resume with the
-   current assessment and decisions.
+5. Update the local project memory (`project.axl` or equivalent local-only
+   notes) so future sessions can resume with the current assessment and
+   decisions.
 6. Bump the package version only after the API and fixture changes are
    understood.
 

@@ -23,6 +23,9 @@ class KtxTests {
     testKtxBc5RoundTrip();
     testKtxMipChainRoundTrip();
     testKtxUnsupportedArrayTexture();
+    testKtxZeroDimensions();
+    testKtxTruncatedKeyValueMetadata();
+    testKtxTruncatedMipHeader();
     testInvalidKtx();
   }
 
@@ -213,6 +216,67 @@ class KtxTests {
             Assertions.assertEquals("ktx unsupported array texture code", FormatErrorCode.UnsupportedFeature, error.code);
           case Success(_):
             Assertions.fail("Expected array KTX bytes to fail.");
+        }
+      case Failure(error):
+        Assertions.fail('Expected KTX RGBA write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testKtxZeroDimensions():Void {
+    var texture = TextureData.fromBytes2D(new ImageSize(1, 1), PixelFormats.RGBA8_UNORM, Bytes.ofHex("11223344"));
+    var codec = new KtxCodec();
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        var invalid = Bytes.alloc(encoded.length);
+        invalid.blit(0, encoded, 0, encoded.length);
+        invalid.set(36, 0);
+        invalid.set(37, 0);
+        invalid.set(38, 0);
+        invalid.set(39, 0);
+        switch (codec.read(invalid)) {
+          case Failure(error):
+            Assertions.assertEquals("ktx zero dimensions code", FormatErrorCode.InvalidStructure, error.code);
+          case Success(_):
+            Assertions.fail("Expected zero-width KTX bytes to fail.");
+        }
+      case Failure(error):
+        Assertions.fail('Expected KTX RGBA write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testKtxTruncatedKeyValueMetadata():Void {
+    var texture = TextureData.fromBytes2D(new ImageSize(1, 1), PixelFormats.RGBA8_UNORM, Bytes.ofHex("11223344"));
+    var codec = new KtxCodec();
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        var invalid = Bytes.alloc(encoded.length);
+        invalid.blit(0, encoded, 0, encoded.length);
+        invalid.set(60, 32);
+        switch (codec.read(invalid)) {
+          case Failure(error):
+            Assertions.assertEquals("ktx truncated metadata code", FormatErrorCode.InvalidStructure, error.code);
+          case Success(_):
+            Assertions.fail("Expected truncated KTX metadata to fail.");
+        }
+      case Failure(error):
+        Assertions.fail('Expected KTX RGBA write to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testKtxTruncatedMipHeader():Void {
+    var texture = TextureData.fromBytes2D(new ImageSize(1, 1), PixelFormats.RGBA8_UNORM, Bytes.ofHex("11223344"));
+    var codec = new KtxCodec();
+
+    switch (codec.write(texture)) {
+      case Success(encoded):
+        var invalid = encoded.sub(0, 66);
+        switch (codec.read(invalid)) {
+          case Failure(error):
+            Assertions.assertEquals("ktx truncated mip header code", FormatErrorCode.InvalidStructure, error.code);
+          case Success(_):
+            Assertions.fail("Expected truncated KTX mip header to fail.");
         }
       case Failure(error):
         Assertions.fail('Expected KTX RGBA write to succeed: ${error.toString()}');

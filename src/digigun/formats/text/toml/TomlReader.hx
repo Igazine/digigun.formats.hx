@@ -43,16 +43,24 @@ class TomlReader implements FormatReader<String, TomlDocument> {
       }
 
       if (isTable(trimmed)) {
+        if (isArrayOfTables(trimmed)) {
+          return Failure(error(FormatErrorCode.UnsupportedFeature, "TOML array-of-tables is not supported in the current document model.", lineNumber, 1));
+        }
+
         var tableName = trimmed.substr(1, trimmed.length - 2).trim();
         if (tableName == "") {
           return Failure(error(FormatErrorCode.InvalidStructure, "Table name cannot be empty.", lineNumber, 1));
         }
-        if (!isSupportedKey(tableName)) {
-          return Failure(error(FormatErrorCode.UnsupportedFeature, 'Unsupported TOML table name "${tableName}". Quoted and non-bare table names are not supported in this version.', lineNumber, 1));
+
+        var parsedTableName = parseKeyPath(tableName, lineNumber, "table name");
+        switch (parsedTableName) {
+          case Failure(parseError):
+            return Failure(parseError);
+          case Success(canonicalTableName):
+            tables.push(new TomlTable(canonicalTableName));
+            currentTableIndex = tables.length - 1;
         }
 
-        tables.push(new TomlTable(tableName));
-        currentTableIndex = tables.length - 1;
         continue;
       }
 
@@ -65,9 +73,14 @@ class TomlReader implements FormatReader<String, TomlDocument> {
       if (key == "") {
         return Failure(error(FormatErrorCode.InvalidStructure, "Property key cannot be empty.", lineNumber, 1));
       }
-      if (!isSupportedKey(key)) {
-        return Failure(error(FormatErrorCode.UnsupportedFeature, 'Unsupported TOML key "${key}". Quoted and non-bare keys are not supported in this version.', lineNumber, 1));
-      }
+
+      var parsedKey = parseKeyPath(key, lineNumber, "key");
+      var canonicalKey = switch (parsedKey) {
+        case Failure(parseError):
+          return Failure(parseError);
+        case Success(value):
+          value;
+      };
 
       var rawValue = trimmed.substr(delimiterIndex + 1).trim();
       var parsedValue = parseValue(rawValue, lineNumber);
@@ -75,11 +88,11 @@ class TomlReader implements FormatReader<String, TomlDocument> {
         case Failure(parseError):
           return Failure(parseError);
         case Success(value):
-          var property = new TomlProperty(key, value);
+          var property = new TomlProperty(canonicalKey, value);
           if (currentTableIndex < 0) {
             globalProperties.push(property);
           } else {
-            tables[currentTableIndex] = tables[currentTableIndex].withProperty(key, value);
+            tables[currentTableIndex] = tables[currentTableIndex].withProperty(canonicalKey, value);
           }
       }
     }
@@ -186,15 +199,19 @@ class TomlReader implements FormatReader<String, TomlDocument> {
           if (key == "") {
             return Failure(error(FormatErrorCode.InvalidStructure, "TOML inline table key cannot be empty.", lineNumber, 1));
           }
-          if (!isSupportedKey(key)) {
-            return Failure(error(FormatErrorCode.UnsupportedFeature, 'Unsupported TOML inline table key "${key}". Quoted and non-bare keys are not supported in this version.', lineNumber, 1));
-          }
+          var parsedKey = parseKeyPath(key, lineNumber, "inline table key");
+          var canonicalKey = switch (parsedKey) {
+            case Failure(parseError):
+              return Failure(parseError);
+            case Success(value):
+              value;
+          };
           var rawValuePart = trimmed.substr(delimiterIndex + 1).trim();
           switch (parseValue(rawValuePart, lineNumber)) {
             case Failure(parseError):
               return Failure(parseError);
             case Success(parsedValue):
-              object.setField(key, parsedValue);
+              object.setField(canonicalKey, parsedValue);
           }
         }
         return Success(object);
@@ -351,8 +368,82 @@ class TomlReader implements FormatReader<String, TomlDocument> {
     return value.length >= 2 && value.charAt(0) == "{" && value.charAt(value.length - 1) == "}";
   }
 
-  function isSupportedKey(value:String):Bool {
-    if (value == "" || TextFormatTools.isQuoted(value)) {
+  function parseKeyPath(value:String, lineNumber:Int, label:String):FormatResult<String> {
+    var parts = splitKeyPathSegments(value, lineNumber, label);
+    switch (parts) {
+      case Failure(parseError):
+        return Failure(parseError);
+      case Success(segments):
+        if (segments.length == 0) {
+          return Failure(error(FormatErrorCode.InvalidStructure, 'TOML ${label} cannot be empty.', lineNumber, 1));
+        }
+
+        var canonical = new Array<String>();
+        for (segment in segments) {
+          var trimmed = segment.trim();
+          if (trimmed == "") {
+            return Failure(error(FormatErrorCode.InvalidStructure, 'TOML ${label} contains an empty dotted segment.', lineNumber, 1));
+          }
+
+          if (TextFormatTools.isQuoted(trimmed)) {
+            canonical.push(renderQuotedKeySegment(TextFormatTools.unescape(trimmed.substr(1, trimmed.length - 2))));
+            continue;
+          }
+
+          if (!isBareKeySegment(trimmed)) {
+            return Failure(error(FormatErrorCode.UnsupportedFeature, 'Unsupported TOML ${label} "${value}". Only bare, quoted, and dotted key paths are supported in this version.', lineNumber, 1));
+          }
+
+          canonical.push(trimmed);
+        }
+
+        return Success(canonical.join("."));
+    }
+  }
+
+  function splitKeyPathSegments(value:String, lineNumber:Int, label:String):FormatResult<Array<String>> {
+    var segments = new Array<String>();
+    var current = new StringBuf();
+    var quote:Null<String> = null;
+    var escaping = false;
+
+    for (index in 0...value.length) {
+      var char = value.charAt(index);
+
+      if (quote != null) {
+        current.add(char);
+        if (escaping) {
+          escaping = false;
+        } else if (char == "\\" && quote == "\"") {
+          escaping = true;
+        } else if (char == quote) {
+          quote = null;
+        }
+        continue;
+      }
+
+      switch (char) {
+        case "\"", "'":
+          quote = char;
+          current.add(char);
+        case ".":
+          segments.push(current.toString());
+          current = new StringBuf();
+        default:
+          current.add(char);
+      }
+    }
+
+    if (quote != null) {
+      return Failure(error(FormatErrorCode.InvalidStructure, 'Unterminated quoted TOML ${label}.', lineNumber, 1));
+    }
+
+    segments.push(current.toString());
+    return Success(segments);
+  }
+
+  function isBareKeySegment(value:String):Bool {
+    if (value == "") {
       return false;
     }
 
@@ -369,8 +460,20 @@ class TomlReader implements FormatReader<String, TomlDocument> {
     return true;
   }
 
+  function renderQuotedKeySegment(value:String):String {
+    return '"${TextFormatTools.escapeDoubleQuoted(value)}"';
+  }
+
   function isTable(value:String):Bool {
     return value.length >= 2 && value.charAt(0) == "[" && value.charAt(value.length - 1) == "]";
+  }
+
+  function isArrayOfTables(value:String):Bool {
+    return value.length >= 4
+      && value.charAt(0) == "["
+      && value.charAt(1) == "["
+      && value.charAt(value.length - 2) == "]"
+      && value.charAt(value.length - 1) == "]";
   }
 
   inline function error(code:FormatErrorCode, message:String, line:Int, column:Int):FormatError {

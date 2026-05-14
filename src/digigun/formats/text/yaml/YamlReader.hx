@@ -112,6 +112,17 @@ class YamlReader implements FormatReader<String, YamlDocument> {
         }
       }
 
+      if (isBlockScalarIndicator(remainder)) {
+        switch (parseBlockScalar(lines, index + 1, currentIndent, remainder == ">")) {
+          case Failure(parseError):
+            return Failure(parseError);
+          case Success(result):
+            value.setProperty(key, result.value);
+            index = result.nextIndex;
+            continue;
+        }
+      }
+
       switch (parseScalar(remainder, index + 1, currentIndent + separatorIndex + 2)) {
         case Failure(parseError):
           return Failure(parseError);
@@ -160,6 +171,17 @@ class YamlReader implements FormatReader<String, YamlDocument> {
         var childIndent = lineIndent(lines[childIndex]);
         var childValue = parseBlock(lines, childIndex, childIndent);
         switch (childValue) {
+          case Failure(parseError):
+            return Failure(parseError);
+          case Success(result):
+            value.add(result.value);
+            index = result.nextIndex;
+            continue;
+        }
+      }
+
+      if (isBlockScalarIndicator(remainder)) {
+        switch (parseBlockScalar(lines, index + 1, currentIndent, remainder == ">")) {
           case Failure(parseError):
             return Failure(parseError);
           case Success(result):
@@ -346,6 +368,79 @@ class YamlReader implements FormatReader<String, YamlDocument> {
     return Success(items);
   }
 
+  function parseBlockScalar(lines:Array<String>, startIndex:Int, parentIndent:Int, folded:Bool):FormatResult<YamlParseResult> {
+    var index = startIndex;
+    var blockIndent = -1;
+    var values = new Array<String>();
+
+    while (index < lines.length) {
+      var rawLine = lines[index];
+      var contentOnly = stripComment(rawLine).trim();
+      var currentIndent = lineIndent(rawLine);
+
+      if (contentOnly == "") {
+        if (blockIndent >= 0) {
+          values.push("");
+        }
+        index++;
+        continue;
+      }
+
+      if (currentIndent <= parentIndent) {
+        break;
+      }
+
+      if (blockIndent < 0) {
+        blockIndent = currentIndent;
+      } else if (currentIndent < blockIndent) {
+        return Failure(error("YAML block scalar indentation is inconsistent.", index + 1, currentIndent + 1));
+      }
+
+      values.push(rawLine.substr(blockIndent));
+      index++;
+    }
+
+    if (blockIndent < 0) {
+      return Success({value: "", nextIndex: index});
+    }
+
+    return Success({
+      value: folded ? foldBlockScalarLines(values) : values.join("\n"),
+      nextIndex: index
+    });
+  }
+
+  function foldBlockScalarLines(lines:Array<String>):String {
+    var output = new StringBuf();
+    var previousWasBlank = false;
+
+    for (index in 0...lines.length) {
+      var line = lines[index];
+      var isBlank = line == "";
+      if (index == 0) {
+        output.add(line);
+        previousWasBlank = isBlank;
+        continue;
+      }
+
+      if (isBlank) {
+        output.add("\n");
+        previousWasBlank = true;
+        continue;
+      }
+
+      if (previousWasBlank) {
+        output.add("\n");
+      } else {
+        output.add(" ");
+      }
+      output.add(line);
+      previousWasBlank = false;
+    }
+
+    return output.toString();
+  }
+
   function findMappingSeparator(value:String):Int {
     var quote:Null<String> = null;
     var escaping = false;
@@ -438,6 +533,10 @@ class YamlReader implements FormatReader<String, YamlDocument> {
 
   inline function looksLikeFlowCollection(value:String):Bool {
     return value != "" && (value.charAt(0) == "[" || value.charAt(0) == "{" || value.charAt(0) == "]" || value.charAt(0) == "}");
+  }
+
+  inline function isBlockScalarIndicator(value:String):Bool {
+    return value == "|" || value == ">";
   }
 
   inline function error(message:String, line:Int, column:Int):FormatError {

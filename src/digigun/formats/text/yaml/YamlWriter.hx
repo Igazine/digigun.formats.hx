@@ -47,7 +47,10 @@ class YamlWriter implements FormatWriter<YamlDocument, String> {
     var lines = new Array<String>();
     var prefix = indentation(indent);
     for (property in value.properties) {
-      if (isScalar(property.value)) {
+      if (isBlockScalar(property.value)) {
+        lines.push('${prefix}${property.key}: |');
+        lines.push(renderBlockScalar(property.value.asString(), indent + 1));
+      } else if (isScalar(property.value)) {
         lines.push('${prefix}${property.key}: ${renderValue(property.value, indent)}');
       } else {
         lines.push('${prefix}${property.key}:');
@@ -61,7 +64,10 @@ class YamlWriter implements FormatWriter<YamlDocument, String> {
     var lines = new Array<String>();
     var prefix = indentation(indent);
     for (item in value.items) {
-      if (isScalar(item)) {
+      if (isBlockScalar(item)) {
+        lines.push('${prefix}- |');
+        lines.push(renderBlockScalar(item.asString(), indent + 1));
+      } else if (isScalar(item)) {
         lines.push('${prefix}- ${renderValue(item, indent)}');
       } else {
         lines.push('${prefix}-');
@@ -78,11 +84,30 @@ class YamlWriter implements FormatWriter<YamlDocument, String> {
     return value;
   }
 
+  function renderBlockScalar(value:String, indent:Int):String {
+    var lines = value.split("\n");
+    var prefix = indentation(indent);
+    var rendered = new Array<String>();
+    for (line in lines) {
+      rendered.push(prefix + line);
+    }
+    return rendered.join("\n");
+  }
+
   function isScalar(value:YamlValue):Bool {
     return switch (cast(value, YamlValueData)) {
       case VString(_) | VInt(_) | VFloat(_) | VBool(_) | VNull:
         true;
       case VArray(_) | VObject(_):
+        false;
+    };
+  }
+
+  function isBlockScalar(value:YamlValue):Bool {
+    return switch (cast(value, YamlValueData)) {
+      case VString(stringValue):
+        stringValue.indexOf("\n") >= 0;
+      case _:
         false;
     };
   }

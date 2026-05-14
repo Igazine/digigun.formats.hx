@@ -21,7 +21,8 @@ class TomlTests {
     testNestedInlineTables();
     testInvalidTomlInlineTableStructure();
     testInvalidTomlUnexpectedClosingDelimiter();
-    testUnsupportedTomlQuotedKeys();
+    testTomlQuotedAndDottedKeys();
+    testUnsupportedTomlArrayOfTables();
     testInvalidToml();
     testTomlValueConversions();
     testImplicitValueConstruction();
@@ -156,21 +157,27 @@ class TomlTests {
     }
   }
 
-  static function testUnsupportedTomlQuotedKeys():Void {
+  static function testTomlQuotedAndDottedKeys():Void {
     var reader = new TomlReader();
 
-    switch (reader.read('"title" = "digigun"')) {
+    switch (reader.read('"site name" = "digigun"\nowner.name = "Igazine"\n["build.settings"]\n"job count" = 2\nfeature.flags = [true, false]')) {
+      case Success(document):
+        Assertions.assertEquals("quoted toml property key preserved", "digigun", document.getGlobalProperty('"site name"').value.asString());
+        Assertions.assertEquals("dotted toml property key preserved", "Igazine", document.getGlobalProperty("owner.name").value.asString());
+        Assertions.assertEquals("quoted toml table name preserved", 2, document.getTable('"build.settings"').getProperty('"job count"').value.asInt());
+        Assertions.assertEquals("dotted toml table property preserved", 2, document.getTable('"build.settings"').getProperty("feature.flags").value.asArray().length);
       case Failure(error):
-        Assertions.assertEquals("unsupported toml quoted property key code", FormatErrorCode.UnsupportedFeature, error.code);
-      case Success(_):
-        Assertions.fail("Expected quoted TOML property key to fail.");
+        Assertions.fail('Expected quoted and dotted TOML keys to succeed: ${error.toString()}');
     }
+  }
 
-    switch (reader.read('["server"]\nenabled = true')) {
+  static function testUnsupportedTomlArrayOfTables():Void {
+    var reader = new TomlReader();
+    switch (reader.read('[[products]]\nname = "hammer"')) {
       case Failure(error):
-        Assertions.assertEquals("unsupported toml quoted table name code", FormatErrorCode.UnsupportedFeature, error.code);
+        Assertions.assertEquals("unsupported toml array of tables code", FormatErrorCode.UnsupportedFeature, error.code);
       case Success(_):
-        Assertions.fail("Expected quoted TOML table name to fail.");
+        Assertions.fail("Expected TOML array-of-tables to fail.");
     }
   }
 

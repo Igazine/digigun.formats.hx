@@ -5,6 +5,26 @@ package digigun.formats.image;
  */
 class TextureCompressionSupport {
   /**
+   * Returns true when the library currently has a real built-in encoder for a
+   * compression method instead of only passthrough or future-planning support.
+   */
+  public static function hasBuiltInEncoder(method:TextureCompressionMethod):Bool {
+    return switch (method) {
+      case TextureCompressionMethod.BC1,
+        TextureCompressionMethod.BC3,
+        TextureCompressionMethod.BC4,
+        TextureCompressionMethod.BC5,
+        TextureCompressionMethod.ETC2Rgb8,
+        TextureCompressionMethod.ETC2Rgba8,
+        TextureCompressionMethod.EacR11,
+        TextureCompressionMethod.EacRg11:
+        true;
+      default:
+        false;
+    };
+  }
+
+  /**
    * Returns compression metadata for a known built-in compressed format.
    */
   public static function infoForFormat(format:PixelFormat):Null<TextureCompressionInfo> {
@@ -148,13 +168,18 @@ class TextureCompressionSupport {
     }
 
     var fallbackFormat = chooseUncompressedFallback(request.source.format);
+    var fallbackContainer = profile.supportedFormatIds.indexOf(fallbackFormat.id) >= 0
+      ? container
+      : TextureContainerFormat.Raw;
     return new TextureTranscodePlan(
       request,
-      container,
+      fallbackContainer,
       fallbackFormat,
       TextureCompressionMethod.None,
       false,
-      "Falling back to an uncompressed texture layout because the requested container/target combination has no built-in compressed match."
+      fallbackContainer == container
+        ? "Falling back to an uncompressed texture layout because the requested container/target combination has no built-in compressed match."
+        : "Falling back to a raw uncompressed texture layout because the requested container cannot store a built-in compressed match or the uncompressed fallback."
     );
   }
 
@@ -183,12 +208,20 @@ class TextureCompressionSupport {
     }
 
     for (candidate in candidates) {
-      if (profile.supportedFormatIds.indexOf(candidate.id) >= 0 && TextureFormatSupport.canUpload(request.api, candidate)) {
+      if (
+        profile.supportedFormatIds.indexOf(candidate.id) >= 0
+        && TextureFormatSupport.canUpload(request.api, candidate)
+        && canRealizeCompressedFormat(request.source, candidate)
+      ) {
         return candidate;
       }
     }
 
-    if (profile.supportedFormatIds.indexOf(baseline.id) >= 0 && TextureFormatSupport.canUpload(request.api, baseline)) {
+    if (
+      profile.supportedFormatIds.indexOf(baseline.id) >= 0
+      && TextureFormatSupport.canUpload(request.api, baseline)
+      && canRealizeCompressedFormat(request.source, baseline)
+    ) {
       return baseline;
     }
 
@@ -244,5 +277,14 @@ class TextureCompressionSupport {
       default:
         [];
     };
+  }
+
+  static function canRealizeCompressedFormat(source:TextureData, format:PixelFormat):Bool {
+    if (source.format.id == format.id) {
+      return true;
+    }
+
+    var info = infoForFormat(format);
+    return info != null && hasBuiltInEncoder(info.method);
   }
 }

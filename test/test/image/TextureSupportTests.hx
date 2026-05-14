@@ -35,12 +35,19 @@ class TextureSupportTests {
 
   static function testCompressionRecommendations():Void {
     var metalPlan = TextureFormatSupport.recommendCompression(GraphicsApi.Metal);
-    Assertions.assertEquals("metal compression format", PixelFormats.ASTC_4X4_RGBA_UNORM.id, metalPlan.format.id);
+    Assertions.assertEquals("metal compression format", PixelFormats.BC3_RGBA_UNORM.id, metalPlan.format.id);
     Assertions.assertEquals("metal compression container", TextureContainerFormat.Ktx, metalPlan.container);
+    Assertions.assertTrue("metal compression method has built-in encoder", TextureCompressionSupport.hasBuiltInEncoder(TextureCompressionSupport.infoForFormat(metalPlan.format).method));
+
+    var vulkanPlan = TextureFormatSupport.recommendCompression(GraphicsApi.Vulkan);
+    Assertions.assertEquals("vulkan compression format", PixelFormats.ETC2_RGBA8_UNORM.id, vulkanPlan.format.id);
+    Assertions.assertEquals("vulkan compression container", TextureContainerFormat.Ktx, vulkanPlan.container);
+    Assertions.assertTrue("vulkan compression method has built-in encoder", TextureCompressionSupport.hasBuiltInEncoder(TextureCompressionSupport.infoForFormat(vulkanPlan.format).method));
 
     var d3dPlan = TextureFormatSupport.recommendCompression(GraphicsApi.Direct3D11);
     Assertions.assertEquals("d3d compression format", PixelFormats.BC3_RGBA_UNORM.id, d3dPlan.format.id);
     Assertions.assertEquals("d3d compression container", TextureContainerFormat.Dds, d3dPlan.container);
+    Assertions.assertTrue("d3d compression method has built-in encoder", TextureCompressionSupport.hasBuiltInEncoder(TextureCompressionSupport.infoForFormat(d3dPlan.format).method));
   }
 
   static function testCompressionMetadata():Void {
@@ -52,6 +59,9 @@ class TextureSupportTests {
     Assertions.assertEquals("etc2 rgba method", TextureCompressionMethod.ETC2Rgba8, TextureCompressionSupport.infoForFormat(PixelFormats.ETC2_RGBA8_UNORM).method);
     Assertions.assertEquals("eac r11 method", TextureCompressionMethod.EacR11, TextureCompressionSupport.infoForFormat(PixelFormats.EAC_R11_UNORM).method);
     Assertions.assertEquals("eac rg11 method", TextureCompressionMethod.EacRg11, TextureCompressionSupport.infoForFormat(PixelFormats.EAC_RG11_UNORM).method);
+    Assertions.assertTrue("bc1 encoder implemented", TextureCompressionSupport.hasBuiltInEncoder(TextureCompressionMethod.BC1));
+    Assertions.assertTrue("astc encoder deferred", !TextureCompressionSupport.hasBuiltInEncoder(TextureCompressionMethod.Astc4x4Rgba));
+    Assertions.assertTrue("pvrtc encoder deferred", !TextureCompressionSupport.hasBuiltInEncoder(TextureCompressionMethod.Pvrtc1_4Rgba));
 
     var profile = TextureCompressionSupport.containerProfile(TextureContainerFormat.Ktx);
     Assertions.assertTrue("ktx supports astc", profile.supportedFormatIds.indexOf(PixelFormats.ASTC_4X4_RGBA_UNORM.id) >= 0);
@@ -68,14 +78,20 @@ class TextureSupportTests {
   static function testTranscodePlanning():Void {
     var rgbaTexture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.RGBA8_UNORM, Bytes.alloc(64));
     var metalPlan = TextureCompressionSupport.buildPlan(new TextureEncodingRequest(GraphicsApi.Metal, rgbaTexture));
-    Assertions.assertEquals("metal transcode format", PixelFormats.ASTC_4X4_RGBA_UNORM.id, metalPlan.outputFormat.id);
+    Assertions.assertEquals("metal transcode format", PixelFormats.BC3_RGBA_UNORM.id, metalPlan.outputFormat.id);
     Assertions.assertEquals("metal transcode container", TextureContainerFormat.Ktx, metalPlan.container);
     Assertions.assertTrue("metal requires gpu encoder", metalPlan.requiresGpuEncoder);
 
     var rgbTexture = new TextureData(TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.RGB8_UNORM);
     var fallbackPlan = TextureCompressionSupport.buildPlan(new TextureEncodingRequest(GraphicsApi.Metal, rgbTexture, false, false, true, TextureContainerFormat.Pvr));
-    Assertions.assertEquals("pvr preferred container chooses pvrtc", PixelFormats.PVRTC1_4_RGBA_UNORM.id, fallbackPlan.outputFormat.id);
-    Assertions.assertEquals("pvr preferred container", TextureContainerFormat.Pvr, fallbackPlan.container);
+    Assertions.assertEquals("pvr preferred container falls back to raw rgb", PixelFormats.RGB8_UNORM.id, fallbackPlan.outputFormat.id);
+    Assertions.assertEquals("pvr preferred container falls back to raw", TextureContainerFormat.Raw, fallbackPlan.container);
+
+    var pvrtcTexture = new TextureData(TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.PVRTC1_4_RGBA_UNORM);
+    var pvrtcPlan = TextureCompressionSupport.buildPlan(new TextureEncodingRequest(GraphicsApi.Metal, pvrtcTexture, true, false, true, TextureContainerFormat.Pvr));
+    Assertions.assertEquals("pvrtc passthrough format", PixelFormats.PVRTC1_4_RGBA_UNORM.id, pvrtcPlan.outputFormat.id);
+    Assertions.assertEquals("pvrtc passthrough container", TextureContainerFormat.Pvr, pvrtcPlan.container);
+    Assertions.assertEquals("pvrtc passthrough method", TextureCompressionMethod.Pvrtc1_4Rgba, pvrtcPlan.compressionMethod);
 
     var d3dRgbPlan = TextureCompressionSupport.buildPlan(new TextureEncodingRequest(GraphicsApi.Direct3D11, rgbTexture, false));
     Assertions.assertEquals("d3d rgb plan prefers bc1", PixelFormats.BC1_RGB_UNORM.id, d3dRgbPlan.outputFormat.id);

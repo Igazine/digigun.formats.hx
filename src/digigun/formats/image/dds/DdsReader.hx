@@ -40,6 +40,10 @@ class DdsReader implements FormatReader<Bytes, TextureData> {
 
     var height = BinaryTools.readUInt32LE(input, 12);
     var width = BinaryTools.readUInt32LE(input, 16);
+    if (width <= 0 || height <= 0) {
+      return failure(FormatErrorCode.InvalidStructure, "DDS dimensions must be greater than zero.");
+    }
+
     var mipCount = BinaryTools.readUInt32LE(input, 28);
     if (mipCount <= 0) {
       mipCount = 1;

@@ -17,6 +17,8 @@ class YamlTests {
     testYamlRoundTrip();
     testYamlNestedFlowCollections();
     testYamlAmbiguousStringRoundTrip();
+    testYamlBlockScalarParsing();
+    testYamlBlockScalarRoundTrip();
     testMutableYamlEditing();
     testInvalidYaml();
     testInvalidYamlTrailingRootContent();
@@ -152,6 +154,47 @@ class YamlTests {
         Assertions.assertEquals("yaml ambiguous flow object string", "{ owner: digigun }", document.getProperty("flow_object_text").value.asString());
       case Failure(error):
         Assertions.fail('Expected YAML ambiguity round trip to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testYamlBlockScalarParsing():Void {
+    var reader = new YamlReader();
+    var source = 'literal: |\n  hello\n  world\nfolded: >\n  hello\n  world\nitems:\n  - |\n    alpha\n    beta';
+
+    switch (reader.read(source)) {
+      case Success(document):
+        Assertions.assertEquals("yaml literal block scalar", "hello\nworld", document.getProperty("literal").value.asString());
+        Assertions.assertEquals("yaml folded block scalar", "hello world", document.getProperty("folded").value.asString());
+        Assertions.assertEquals("yaml array block scalar", "alpha\nbeta", document.getProperty("items").value.asArray().get(0).asString());
+      case Failure(error):
+        Assertions.fail('Expected YAML block scalar parsing to succeed: ${error.toString()}');
+    }
+  }
+
+  static function testYamlBlockScalarRoundTrip():Void {
+    var root = new YamlObject();
+    root.setProperty("literal", "hello\nworld");
+    var items = new YamlArray();
+    items.add("alpha\nbeta");
+    root.setProperty("items", items);
+
+    var codec = new YamlCodec();
+    var serialized = switch (codec.write(new YamlDocument(root))) {
+      case Success(value):
+        value;
+      case Failure(error):
+        Assertions.fail('Expected YAML block scalar write to succeed: ${error.toString()}');
+        "";
+    };
+
+    Assertions.assertEquals("yaml block scalar serialization", 'literal: |\n  hello\n  world\nitems:\n  - |\n    alpha\n    beta', serialized);
+
+    switch (codec.read(serialized)) {
+      case Success(document):
+        Assertions.assertEquals("yaml block scalar round trip literal", "hello\nworld", document.getProperty("literal").value.asString());
+        Assertions.assertEquals("yaml block scalar round trip array item", "alpha\nbeta", document.getProperty("items").value.asArray().get(0).asString());
+      case Failure(error):
+        Assertions.fail('Expected YAML block scalar round trip to succeed: ${error.toString()}');
     }
   }
 

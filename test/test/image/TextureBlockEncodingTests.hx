@@ -318,5 +318,26 @@ class TextureBlockEncodingTests {
       case Failure(error):
         Assertions.fail('Expected planned EAC RG11 encode dispatch to succeed: ${error.toString()}');
     }
+
+    var metalAlphaTexture = TextureData.fromBytes2D(new ImageSize(4, 4), PixelFormats.RGBA8_UNORM, Bytes.alloc(64));
+    var metalAlphaRequest = new TextureEncodingRequest(digigun.formats.image.GraphicsApi.Metal, metalAlphaTexture, true, false, false, TextureContainerFormat.Ktx);
+    switch (TextureBlockEncodingSupport.encode(metalAlphaRequest, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertEquals("planned metal dispatch method", TextureCompressionMethod.BC3, result.method);
+        Assertions.assertEquals("planned metal dispatch format", PixelFormats.BC3_RGBA_UNORM.id, result.texture.format.id);
+      case Failure(error):
+        Assertions.fail('Expected planned Metal encode dispatch to succeed: ${error.toString()}');
+    }
+
+    var pvrtcTexture = new TextureData(TextureDimension.Texture2D, new ImageSize(4, 4), PixelFormats.PVRTC1_4_RGBA_UNORM);
+    pvrtcTexture.getOrCreatePrimarySurface().setMipLevel(new MipLevel(0, new ImageSize(4, 4), ByteBuffer.wrap(Bytes.alloc(8))));
+    var pvrtcRequest = new TextureEncodingRequest(digigun.formats.image.GraphicsApi.Metal, pvrtcTexture, true, false, false, TextureContainerFormat.Pvr);
+    switch (TextureBlockEncodingSupport.encode(pvrtcRequest, new TextureBlockEncodingOptions())) {
+      case Success(result):
+        Assertions.assertEquals("planned pvrtc passthrough method", TextureCompressionMethod.Pvrtc1_4Rgba, result.method);
+        Assertions.assertTrue("planned pvrtc passthrough", result.wasPassthrough);
+      case Failure(error):
+        Assertions.fail('Expected planned PVRTC passthrough dispatch to succeed: ${error.toString()}');
+    }
   }
 }
