@@ -3,17 +3,17 @@ id: digigun-formats-hx
 v: 0.2
 name: digigun.formats.hx
 created: @20260514T1728
-modified: @20260514T1844
+modified: @20260514T2012
 agents: gpt-5
 tags: haxe|haxelib|formats|codec|parser|serializer|texture
 
 @state
-status: WIP
-focus: image API consistency and clearer contract boundaries between upload support and fresh built-in encoding
+status: PAUSED
+focus: stable 0.3.x checkpoint with mature text formats and a hardened image subset
 phase: stabilization
 blockers: ~
-last_act: ACT:clarified the image API contract and example usage around uploadable formats versus freshly encodable compression families
-next_act: decide whether to stop at the current hardened image subset or resume capability work on deferred ASTC/PVRTC built-in encoding
+last_act: ACT:recorded the library as an intentional pause point after the text-format maturation and image hardening passes
+next_act: if work resumes later, start with an ASTC 4x4 research-and-contract branch rather than broad new feature expansion
 err: ~
 >>mem
 package_kind: haxelib
@@ -54,5 +54,8 @@ state-tracking:WIP:P1:Maintain local-only AXL continuity for future Codex sessio
 @20260514T1840:gpt-5:ACT:normalized README contract wording across INI, EditorConfig, TOML, CSV, properties, env, YAML, MessagePack, NDJSON, and HCL using explicit deferred versus out-of-scope statements
 @20260514T1842:gpt-5:ACT:closed the text-expansion loop by declaring the current text surface functionally mature for 0.3.x and shifting future text work to concrete needs only
 @20260514T1844:gpt-5:ACT:clarified the image API boundary between GPU upload support and fresh built-in encoders, updated the canonical example, and added tests that the recommended compression baselines are actually built-in encodable
+@20260514T2008:gpt-5:ACT:scoped ASTC 4x4 against the existing encoder architecture and concluded that a research spike is needed before implementation because KTX/container wiring and valid ASTC bitstream formation are still missing
+@20260514T1914:gpt-5:ACT:confirmed the repo is clean after commit 9972eb4 and recommended the next focus as image-side capability work, especially ASTC before PVRTC
+@20260514T2012:gpt-5:ACT:saved the project as an intentional pause point with a stable 0.3.x text surface, a hardened image subset, and ASTC 4x4 research as the recommended future resume path
 
 @ref

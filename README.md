@@ -370,6 +370,16 @@ captures the stabilized text-format surface, the EditorConfig specialization,
 the text namespace move, and the current image/texture subset including BC4/BC5,
 RG8, and the ETC2/EAC family while keeping format-specific subsets explicit.
 
+Current pause point:
+
+- the text-format surface is intentionally strong enough for the current phase
+- the image subset is hardened and internally coherent at its current scope
+- the next serious capability step, if work resumes later, is a short
+  `ASTC 4x4 RGBA` research-and-contract branch before any real ASTC encoder
+  implementation
+- until then, the library is intentionally being left as-is rather than growing
+  more surface area for its own sake
+
 ## Compatibility Policy
 
 During `0.3.x`, the project aims to keep these behaviors stable unless there is
